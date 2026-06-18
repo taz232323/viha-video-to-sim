@@ -250,7 +250,46 @@ def write_annotated_spec(payload: dict) -> Path:
 
     object_radius = float(payload.get("object_radius_m", 0.022))
     target_radius = float(payload.get("target_radius_m", 0.055))
-    if task_type == "orange_to_bowl":
+    if task_type == "tissue_pull":
+        tissue_box_center = payload.get("tissue_box_center") or [
+            points["pick_object"][0],
+            points["pick_object"][1] + 65,
+        ]
+        objects = [
+            {
+                "id": "tissue_0",
+                "label": "tissue_sheet",
+                "mjcf_body": "bowl",
+                "center_pixel": points["pick_object"],
+                "estimated_radius_m": object_radius,
+                "body_origin_z_above_table_m": 0.105,
+                "role": "pick_object",
+            },
+            {
+                "id": "pull_clear_target_0",
+                "label": "pull_clear_target",
+                "mjcf_body": "plate",
+                "center_pixel": points["target"],
+                "estimated_radius_m": target_radius,
+                "body_origin_z_above_table_m": 0.245,
+                "role": "pull_target",
+            },
+        ]
+        spec.setdefault("scene_options", {})["object_shapes"] = {
+            "tissue_0": "tissue_sheet",
+            "pull_clear_target_0": "pull_target",
+        }
+        spec["scene_options"]["tissue_box"] = {
+            "center_pixel": tissue_box_center,
+            "size_m": float(payload.get("tissue_box_size_m", 0.13)),
+        }
+        spec["task"] = {
+            "type": "tissue_pull",
+            "pick_object": "tissue_0",
+            "pull_target": "pull_clear_target_0",
+            "success": "tissue_0 moved clear of tissue_box_0",
+        }
+    elif task_type == "orange_to_bowl":
         objects = [
             {
                 "id": "orange_0",

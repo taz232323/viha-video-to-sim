@@ -1,0 +1,72 @@
+{
+  "description": "Template for a Hiwonder JetArm tissue-from-box video-derived simulation.",
+  "source": {
+    "type": "video",
+    "video_path": "inputs/videos/tissue_box_pull_001.webm",
+    "representative_frame_path": "outputs/video_frames/tissue_box_pull_001/preview/frame_001.png"
+  },
+  "robot": {
+    "type": "hiwonder_jetarm",
+    "base_body": "hiwonder_jetarm"
+  },
+  "calibration": {
+    "table_surface_z": 0.765,
+    "table_corners_pixels": {
+      "front_left": [38, 501],
+      "front_right": [805, 501],
+      "back_right": [700, 164],
+      "back_left": [112, 168]
+    },
+    "table_corners_world": {
+      "front_left": [-0.45, -0.30],
+      "front_right": [0.45, -0.30],
+      "back_right": [0.45, 0.30],
+      "back_left": [-0.45, 0.30]
+    },
+    "robot_base_world_xyz": [-0.27, -0.18, 0.765],
+    "base_frame_note": "Replace the pixel points with values from the recorded tissue-box representative frame."
+  },
+  "objects": [
+    {
+      "id": "tissue_0",
+      "label": "tissue_sheet",
+      "mjcf_body": "bowl",
+      "center_pixel": [542, 198],
+      "estimated_radius_m": 0.04,
+      "body_origin_z_above_table_m": 0.105,
+      "role": "pick_object"
+    },
+    {
+      "id": "pull_clear_target_0",
+      "label": "pull_clear_target",
+      "mjcf_body": "plate",
+      "center_pixel": [610, 118],
+      "estimated_radius_m": 0.07,
+      "body_origin_z_above_table_m": 0.245,
+      "role": "pull_target"
+    }
+  ],
+  "task": {
+    "type": "tissue_pull",
+    "pick_object": "tissue_0",
+    "pull_target": "pull_clear_target_0",
+    "success": "tissue_0 moved clear of tissue_box_0"
+  },
+  "scene_options": {
+    "minimal_photo_scene": true,
+    "object_shapes": {
+      "tissue_0": "tissue_sheet",
+      "pull_clear_target_0": "pull_target"
+    },
+    "tissue_box": {
+      "center_pixel": [542, 264],
+      "size_m": 0.13
+    }
+  },
+  "outputs": {
+    "scene_xml": "outputs/generated/tissue_box_pull_001_scene.xml",
+    "metadata_json": "outputs/generated/tissue_box_pull_001_scene_metadata.json",
+    "snapshot_png": "outputs/generated/tissue_box_pull_001_scene_snapshot.png",
+    "result_json": "outputs/generated/tissue_box_pull_001_scene_result.json"
+  }
+}

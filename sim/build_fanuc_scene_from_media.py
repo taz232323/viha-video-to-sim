@@ -222,6 +222,159 @@ def replace_body_with_target_square(body: ET.Element, half_size_m: float) -> Non
     )
 
 
+def replace_body_with_tissue_sheet(body: ET.Element, half_width_m: float) -> None:
+    for child in list(body):
+        if child.tag == "geom":
+            body.remove(child)
+
+    sheet_length = max(0.09, half_width_m * 4.0)
+    sheet_drop = max(0.055, half_width_m * 2.3)
+    thickness = 0.003
+
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_sheet_collision",
+            "type": "box",
+            "pos": f"{sheet_length * 0.42:.6f} 0 {-sheet_drop * 0.42:.6f}",
+            "size": f"{sheet_length * 0.5:.6f} {thickness:.6f} {sheet_drop * 0.5:.6f}",
+            "rgba": "0.97 0.98 0.96 0.92",
+            "mass": "0.012",
+            "friction": "1.0 0.02 0.001",
+        },
+    )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_fold_top",
+            "type": "box",
+            "pos": "0 0 0.006",
+            "size": f"{half_width_m:.6f} {thickness * 1.25:.6f} 0.009",
+            "rgba": "1 1 1 0.96",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_soft_edge",
+            "type": "capsule",
+            "fromto": f"{sheet_length * 0.88:.6f} 0 {-sheet_drop * 0.88:.6f} {sheet_length:.6f} 0 {-sheet_drop:.6f}",
+            "size": "0.006",
+            "rgba": "0.92 0.94 0.93 0.85",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+
+
+def replace_body_with_pull_target(body: ET.Element, radius_m: float) -> None:
+    for child in list(body):
+        if child.tag in {"geom", "site"}:
+            body.remove(child)
+
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "pull_target_marker",
+            "type": "cylinder",
+            "pos": "0 0 0",
+            "size": f"{radius_m:.6f} 0.002",
+            "rgba": "0.06 0.82 0.24 0.28",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+    ET.SubElement(
+        body,
+        "site",
+        {
+            "name": "success_target",
+            "pos": "0 0 0",
+            "size": f"{radius_m:.6f}",
+            "rgba": "0 0.8 0.2 0.18",
+        },
+    )
+
+
+def add_tissue_box(root: ET.Element, world_xy: np.ndarray, table_surface_z: float, size_m: float = 0.12) -> None:
+    remove_body(root, "tissue_box")
+    worldbody = root.find("worldbody")
+    if worldbody is None:
+        raise ValueError("MJCF missing worldbody")
+
+    half_x = size_m * 0.5
+    half_y = size_m * 0.43
+    half_z = size_m * 0.36
+    body = ET.SubElement(
+        worldbody,
+        "body",
+        {
+            "name": "tissue_box",
+            "pos": fmt_vec(np.array([world_xy[0], world_xy[1], table_surface_z], dtype=float)),
+        },
+    )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_box_shell",
+            "type": "box",
+            "pos": f"0 0 {half_z:.6f}",
+            "size": f"{half_x:.6f} {half_y:.6f} {half_z:.6f}",
+            "rgba": "0.32 0.76 0.38 1",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_box_opening",
+            "type": "box",
+            "pos": f"0 0 {2 * half_z + 0.003:.6f}",
+            "size": f"{half_x * 0.46:.6f} {half_y * 0.34:.6f} 0.004",
+            "rgba": "0.04 0.045 0.04 1",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+    for index, (x, y) in enumerate(((-0.55, -0.45), (0.55, -0.12), (-0.15, 0.46), (0.28, 0.28))):
+        ET.SubElement(
+            body,
+            "geom",
+            {
+                "name": f"tissue_box_flower_{index}",
+                "type": "cylinder",
+                "pos": f"{x * half_x:.6f} {-half_y - 0.002:.6f} {(0.78 + 0.22 * y) * half_z:.6f}",
+                "euler": "90 0 0",
+                "size": f"{size_m * 0.055:.6f} 0.002",
+                "rgba": "0.95 0.38 0.72 1",
+                "contype": "0",
+                "conaffinity": "0",
+            },
+        )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_box_label",
+            "type": "box",
+            "pos": f"0 {-half_y - 0.003:.6f} {half_z:.6f}",
+            "size": f"{half_x * 0.46:.6f} 0.002 {half_z * 0.18:.6f}",
+            "rgba": "0.95 0.92 0.66 1",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+
+
 def add_success_screen(root: ET.Element) -> None:
     if find_body(root, "success_screen") is not None:
         return
@@ -339,6 +492,12 @@ def apply_scene_options(root: ET.Element, spec: dict[str, Any]) -> None:
         elif object_shapes.get(item.get("id")) == "target_square":
             body = body_by_name(root, body_name)
             replace_body_with_target_square(body, float(item.get("estimated_radius_m", 0.06)))
+        elif object_shapes.get(item.get("id")) == "tissue_sheet":
+            body = body_by_name(root, body_name)
+            replace_body_with_tissue_sheet(body, float(item.get("estimated_radius_m", 0.035)))
+        elif object_shapes.get(item.get("id")) == "pull_target":
+            body = body_by_name(root, body_name)
+            replace_body_with_pull_target(body, float(item.get("estimated_radius_m", 0.065)))
 
 
 def fmt_vec(values: np.ndarray) -> str:
@@ -410,10 +569,23 @@ def update_scene_tree(
             }
         )
 
+    tissue_box = spec.get("scene_options", {}).get("tissue_box")
+    generated_tissue_box = None
+    if tissue_box and tissue_box.get("center_pixel"):
+        box_pixel = parse_xy(tissue_box["center_pixel"], "scene_options.tissue_box.center_pixel")
+        box_xy = apply_homography(homography, box_pixel)
+        add_tissue_box(root, box_xy, table_surface_z, float(tissue_box.get("size_m", 0.12)))
+        generated_tissue_box = {
+            "center_pixel": box_pixel.round(3).tolist(),
+            "world_xy_m": box_xy.round(6).tolist(),
+            "size_m": float(tissue_box.get("size_m", 0.12)),
+        }
+
     return {
         "table_surface_z": table_surface_z,
         "homography_pixel_to_world": homography.round(10).tolist(),
         "objects": generated_objects,
+        "tissue_box": generated_tissue_box,
         "task": spec.get("task", {}),
     }
 

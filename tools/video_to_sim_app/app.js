@@ -52,6 +52,7 @@ const ctx = canvas.getContext("2d");
 const currentPointLabel = document.getElementById("currentPointLabel");
 const pointList = document.getElementById("pointList");
 const results = document.getElementById("results");
+const taskTypeSelect = document.getElementById("taskType");
 
 windowsInput.value = JSON.stringify(defaultWindows, null, 2);
 renderPointList();
@@ -244,6 +245,21 @@ document.getElementById("cubePreset").addEventListener("click", () => {
   document.getElementById("targetRadius").value = "0.055";
   renderPointList();
   drawAnnotations();
+});
+
+taskTypeSelect.addEventListener("change", () => {
+  if (taskTypeSelect.value === "tissue_pull") {
+    document.getElementById("robotX").value = "-0.27";
+    document.getElementById("robotY").value = "-0.18";
+    document.getElementById("objectRadius").value = "0.040";
+    document.getElementById("targetRadius").value = "0.070";
+  } else if (taskTypeSelect.value === "orange_to_bowl") {
+    document.getElementById("objectRadius").value = "0.035";
+    document.getElementById("targetRadius").value = "0.075";
+  } else {
+    document.getElementById("objectRadius").value = "0.022";
+    document.getElementById("targetRadius").value = "0.055";
+  }
 });
 
 window.addEventListener("resize", () => {

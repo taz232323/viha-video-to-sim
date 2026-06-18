@@ -147,6 +147,9 @@ class RuntimeConfig:
     plate_target: np.ndarray
     on_plate_xy_tol: float = ON_PLATE_XY_TOL
     on_plate_z_range: tuple[float, float] = ON_PLATE_Z_RANGE
+    task_type: str = "pick_and_place"
+    object_name: str = "bowl_0"
+    target_name: str = "target_bowl_0"
 
 
 def start_zoom_slider(initial_distance: float) -> ZoomControl | None:
@@ -246,6 +249,19 @@ def runtime_config_from_scene(
     mujoco.mj_forward(model, data)
     bowl_start = data.qpos[handles.bowl_qpos : handles.bowl_qpos + 3].copy()
     plate_pos = scene_body_position(model, data, "plate")
+    tissue_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "tissue_sheet_collision")
+    if tissue_id >= 0:
+        return RuntimeConfig(
+            scene_path=scene_path,
+            bowl_start=bowl_start,
+            plate_target=np.array([plate_pos[0], plate_pos[1], plate_pos[2]], dtype=float),
+            on_plate_xy_tol=0.075,
+            on_plate_z_range=(float(plate_pos[2]) - 0.055, float(plate_pos[2]) + 0.055),
+            task_type="tissue_pull",
+            object_name="tissue_0",
+            target_name="pull_clear_target_0",
+        )
+
     flat_target_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "target_square_marker")
     if flat_target_id >= 0:
         target_z = float(bowl_start[2])
@@ -260,6 +276,12 @@ def runtime_config_from_scene(
         plate_target=plate_target,
         on_plate_z_range=z_range,
     )
+
+
+def grasp_offset(config: RuntimeConfig) -> np.ndarray:
+    if config.task_type == "tissue_pull":
+        return np.array([0.0, 0.0, -0.018])
+    return BOWL_GRASP_OFFSET
 
 
 def solve_ik_locked_wrist(
@@ -306,13 +328,16 @@ def make_demo_segments(
     handles: RobotHandles,
     config: RuntimeConfig,
 ) -> list[Segment]:
+    if config.task_type == "tissue_pull":
+        return make_tissue_pull_segments(model, data, handles, config)
+
     seed = np.array([0.2, 0.55, -0.8, *FIXED_WRIST_Q])
     safe_z = max(float(config.bowl_start[2]), float(config.plate_target[2])) + 0.18
     mid_xy = 0.5 * (config.bowl_start[:2] + config.plate_target[:2])
     targets = {
         "home": np.array([0.0, -0.08, safe_z + 0.05]),
         "pick_hover": np.array([config.bowl_start[0], config.bowl_start[1], safe_z]),
-        "pick_low": config.bowl_start - BOWL_GRASP_OFFSET + np.array([0.0, 0.0, 0.004]),
+        "pick_low": config.bowl_start - grasp_offset(config) + np.array([0.0, 0.0, 0.004]),
         "transfer": np.array([mid_xy[0], mid_xy[1], safe_z + 0.02]),
         "place_hover": np.array([config.plate_target[0], config.plate_target[1], safe_z]),
         "place_release": config.plate_target + PLACE_RELEASE_OFFSET,
@@ -338,9 +363,86 @@ def make_demo_segments(
     ]
 
 
+def make_tissue_pull_segments(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    handles: RobotHandles,
+    config: RuntimeConfig,
+) -> list[Segment]:
+    seed = np.array([0.2, 0.55, -0.8, *FIXED_WRIST_Q])
+    offset = grasp_offset(config)
+    safe_z = max(float(config.bowl_start[2]), float(config.plate_target[2])) + 0.12
+    pull_mid = 0.45 * config.bowl_start + 0.55 * config.plate_target + np.array([0.0, 0.0, 0.08])
+    targets = {
+        "home": np.array([-0.02, -0.12, safe_z + 0.05]),
+        "pick_hover": np.array([config.bowl_start[0], config.bowl_start[1], safe_z]),
+        "pick_low": config.bowl_start - offset + np.array([0.0, 0.0, 0.004]),
+        "pull_up": config.bowl_start - offset + np.array([0.0, 0.0, 0.12]),
+        "pull_mid": pull_mid - offset,
+        "pull_clear": config.plate_target - offset,
+        "retreat": config.plate_target - offset + np.array([-0.06, -0.03, 0.055]),
+    }
+
+    solved: dict[str, np.ndarray] = {}
+    for name, target in targets.items():
+        seed = solve_ik_locked_wrist(model, data, handles, target, seed, max_iters=300)
+        solved[name] = seed.copy()
+
+    return [
+        Segment(0.85, DemoState(solved["home"], OPEN_GRIP), DemoState(solved["pick_hover"], OPEN_GRIP), carrying=False),
+        Segment(0.65, DemoState(solved["pick_hover"], OPEN_GRIP), DemoState(solved["pick_low"], OPEN_GRIP), carrying=False),
+        Segment(0.45, DemoState(solved["pick_low"], OPEN_GRIP), DemoState(solved["pick_low"], CLOSED_GRIP), carrying=False),
+        Segment(0.7, DemoState(solved["pick_low"], CLOSED_GRIP), DemoState(solved["pull_up"], CLOSED_GRIP), carrying=True),
+        Segment(0.9, DemoState(solved["pull_up"], CLOSED_GRIP), DemoState(solved["pull_mid"], CLOSED_GRIP), carrying=True),
+        Segment(0.9, DemoState(solved["pull_mid"], CLOSED_GRIP), DemoState(solved["pull_clear"], CLOSED_GRIP), carrying=True),
+        Segment(0.45, DemoState(solved["pull_clear"], CLOSED_GRIP), DemoState(solved["pull_clear"], CLOSED_GRIP), carrying=False, placed=True),
+        Segment(0.65, DemoState(solved["pull_clear"], CLOSED_GRIP), DemoState(solved["retreat"], OPEN_GRIP), carrying=False, placed=True),
+    ]
+
+
 def cartesian_follow_plan(config: RuntimeConfig | None = None) -> list[dict[str, object]]:
     bowl_start = config.bowl_start if config is not None else BOWL_START
     plate_target = config.plate_target if config is not None else PLATE_TARGET
+    if config is not None and config.task_type == "tissue_pull":
+        offset = grasp_offset(config)
+        return [
+            {
+                "stage": "ready",
+                "target_m": [-0.02, -0.12, round(float(max(bowl_start[2], plate_target[2]) + 0.17), 4)],
+                "gripper": "open",
+                "duration_s": 1.0,
+            },
+            {
+                "stage": "pre_grasp_tissue_tab",
+                "target_m": (bowl_start - offset + np.array([0.0, 0.0, 0.12])).round(4).tolist(),
+                "gripper": "open",
+                "duration_s": 1.0,
+            },
+            {
+                "stage": "grasp_tissue_tab",
+                "target_m": (bowl_start - offset + np.array([0.0, 0.0, 0.004])).round(4).tolist(),
+                "gripper": "closed",
+                "duration_s": 0.75,
+            },
+            {
+                "stage": "pull_up_from_box",
+                "target_m": (bowl_start - offset + np.array([0.0, 0.0, 0.12])).round(4).tolist(),
+                "gripper": "closed",
+                "duration_s": 1.0,
+            },
+            {
+                "stage": "pull_clear",
+                "target_m": (plate_target - offset).round(4).tolist(),
+                "gripper": "closed",
+                "duration_s": 1.2,
+            },
+            {
+                "stage": "hold_clear_success",
+                "target_m": (plate_target - offset).round(4).tolist(),
+                "gripper": "closed",
+                "duration_s": 0.7,
+            },
+        ]
     return [
         {
             "stage": "ready",
@@ -414,7 +516,7 @@ def update_bowl_for_stage(
     placed: bool,
 ) -> None:
     if carrying:
-        set_bowl_pose(model, data, handles, gripper_position(data, handles) + BOWL_GRASP_OFFSET)
+        set_bowl_pose(model, data, handles, gripper_position(data, handles) + grasp_offset(config))
     elif placed:
         set_bowl_pose(model, data, handles, config.plate_target)
     else:
@@ -437,6 +539,11 @@ def task_metrics(
     success = not carrying and xy_distance <= config.on_plate_xy_tol and z_ok
     return {
         "success": bool(success),
+        "task_type": config.task_type,
+        "object_name": config.object_name,
+        "target_name": config.target_name,
+        "object_final_position_m": bowl_pos.round(6).tolist(),
+        "target_position_m": config.plate_target.round(6).tolist(),
         "bowl_final_position_m": bowl_pos.round(6).tolist(),
         "target_bowl_position_m": config.plate_target.round(6).tolist(),
         "xy_distance_to_target_m": xy_distance,
@@ -553,6 +660,9 @@ def run_headless(
     print(f"Target bowl position: {metrics['target_bowl_position_m']}")
     print(f"XY distance to target: {metrics['xy_distance_to_target_m']:.4f} m")
     print(f"Z within target bowl range: {metrics['z_within_plate_range']}")
+    if config.task_type == "tissue_pull":
+        print(f"Tissue final position: {metrics['object_final_position_m']}")
+        print(f"Pull-clear target position: {metrics['target_position_m']}")
     print(f"TASK COMPLETE: SUCCESS={metrics['success']}")
 
     if result_json is not None:
@@ -622,7 +732,10 @@ def run_viewer(
                 last_phase = phase
 
             if complete and not announced_success:
-                print("TASK COMPLETE: bowl_0 is in target_bowl_0. SUCCESS=True")
+                if config.task_type == "tissue_pull":
+                    print("TASK COMPLETE: tissue_0 is pulled clear of tissue_box_0. SUCCESS=True")
+                else:
+                    print("TASK COMPLETE: bowl_0 is in target_bowl_0. SUCCESS=True")
                 announced_success = True
             elif not complete and announced_success and not placed:
                 announced_success = False

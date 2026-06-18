@@ -10,6 +10,7 @@ The project now supports:
 - Video frame extraction from user-marked task windows.
 - Clean-frame selection and selected-frame manifests.
 - First-pass video-derived scene generation.
+- A tissue-from-box JetArm task preset with a tissue box, tissue sheet, pull-clear target, and success check.
 - Review PNG sheets so a user can inspect sim stages without replaying the terminal viewer.
 
 ## Current Workflow
@@ -116,6 +117,7 @@ Render a review PNG:
 - `sim/render_jetarm_review_sheet.py` - creates a labeled review PNG from a sim timeline.
 - `sim/VIDEO_TO_SIM_PIPELINE.md` - detailed video-to-sim process.
 - `sim/video_specs/jetarm_video_task_spec_template.json` - JetArm video scene template.
+- `sim/video_specs/jetarm_tissue_pull_spec_template.json` - JetArm tissue-from-box video scene template.
 - `tools/video_to_sim_app/server.py` - local upload/annotation/build web app.
 - `tools/video_recorder/index.html` - local Chrome recorder.
 - `inputs/video_plans/cube_to_square_window_plan_template.json` - starter video window plan.
