@@ -87,13 +87,13 @@
       <geom name="leg_br" type="box" pos="0.68 0.38 0.36" size="0.04 0.04 0.36" material="table_edge_mat"/>
       <geom name="wood_grain_1" type="box" pos="-0.35 -0.08 0.763" size="0.28 0.004 0.003" rgba="0.36 0.24 0.14 1" contype="0" conaffinity="0"/>
       <geom name="wood_grain_2" type="box" pos="0.22 0.15 0.763" size="0.34 0.004 0.003" rgba="0.36 0.24 0.14 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_mat" type="box" pos="0.0 0.035 0.766" size="0.34 0.22 0.002" rgba="0.06 0.08 0.085 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_grid_x1" type="box" pos="-0.17 0.035 0.769" size="0.002 0.22 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_grid_x2" type="box" pos="0 0.035 0.769" size="0.002 0.22 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_grid_x3" type="box" pos="0.17 0.035 0.769" size="0.002 0.22 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_grid_y1" type="box" pos="0 -0.075 0.77" size="0.34 0.002 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_grid_y2" type="box" pos="0 0.035 0.77" size="0.34 0.002 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
-      <geom name="calibration_grid_y3" type="box" pos="0 0.145 0.77" size="0.34 0.002 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_mat" type="box" pos="0.0 0.035 0.766" size="0.36 0.28 0.002" rgba="0.0 0.62 0.86 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_x1" type="box" pos="-0.18 0.035 0.769" size="0.002 0.28 0.0015" rgba="0.16 0.32 0.38 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_x2" type="box" pos="0 0.035 0.769" size="0.002 0.28 0.0015" rgba="0.16 0.32 0.38 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_x3" type="box" pos="0.18 0.035 0.769" size="0.002 0.28 0.0015" rgba="0.16 0.32 0.38 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_y1" type="box" pos="0 -0.105 0.77" size="0.36 0.002 0.0015" rgba="0.16 0.32 0.38 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_y2" type="box" pos="0 0.035 0.77" size="0.36 0.002 0.0015" rgba="0.16 0.32 0.38 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_y3" type="box" pos="0 0.175 0.77" size="0.36 0.002 0.0015" rgba="0.16 0.32 0.38 1" contype="0" conaffinity="0"/>
       <geom name="table_scuff_1" type="capsule" fromto="-0.67 -0.2 0.769 -0.51 -0.16 0.769" size="0.003" rgba="0.22 0.16 0.11 1" contype="0" conaffinity="0"/>
       <geom name="table_scuff_2" type="capsule" fromto="0.54 0.05 0.769 0.69 0.12 0.769" size="0.003" rgba="0.22 0.16 0.11 1" contype="0" conaffinity="0"/>
     </body>
