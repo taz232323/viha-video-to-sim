@@ -284,6 +284,25 @@ def grasp_offset(config: RuntimeConfig) -> np.ndarray:
     return BOWL_GRASP_OFFSET
 
 
+def flat_tissue_quat() -> np.ndarray:
+    angle = math.radians(90.0)
+    return np.array([math.cos(angle / 2.0), math.sin(angle / 2.0), 0.0, 0.0], dtype=float)
+
+
+def set_task_object_pose(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    handles: RobotHandles,
+    pos: np.ndarray,
+    quat: np.ndarray | None = None,
+) -> None:
+    data.qpos[handles.bowl_qpos : handles.bowl_qpos + 3] = pos
+    data.qpos[handles.bowl_qpos + 3 : handles.bowl_qpos + 7] = (
+        quat if quat is not None else np.array([1.0, 0.0, 0.0, 0.0], dtype=float)
+    )
+    data.qvel[handles.bowl_dof : handles.bowl_dof + 6] = 0.0
+
+
 def solve_ik_locked_wrist(
     model: mujoco.MjModel,
     data: mujoco.MjData,
@@ -371,16 +390,18 @@ def make_tissue_pull_segments(
 ) -> list[Segment]:
     seed = np.array([0.2, 0.55, -0.8, *FIXED_WRIST_Q])
     offset = grasp_offset(config)
-    safe_z = max(float(config.bowl_start[2]), float(config.plate_target[2])) + 0.12
-    pull_mid = 0.45 * config.bowl_start + 0.55 * config.plate_target + np.array([0.0, 0.0, 0.08])
+    safe_z = max(float(config.bowl_start[2]), float(config.plate_target[2])) + 0.14
+    pull_mid = 0.55 * config.bowl_start + 0.45 * config.plate_target + np.array([0.0, 0.0, 0.09])
+    pull_laydown = np.array([config.plate_target[0], config.plate_target[1], config.plate_target[2] + 0.075])
     targets = {
         "home": np.array([-0.02, -0.12, safe_z + 0.05]),
         "pick_hover": np.array([config.bowl_start[0], config.bowl_start[1], safe_z]),
         "pick_low": config.bowl_start - offset + np.array([0.0, 0.0, 0.004]),
         "pull_up": config.bowl_start - offset + np.array([0.0, 0.0, 0.12]),
         "pull_mid": pull_mid - offset,
+        "pull_laydown": pull_laydown - offset,
         "pull_clear": config.plate_target - offset,
-        "retreat": config.plate_target - offset + np.array([-0.06, -0.03, 0.055]),
+        "retreat": config.plate_target - offset + np.array([-0.06, -0.03, 0.11]),
     }
 
     solved: dict[str, np.ndarray] = {}
@@ -394,9 +415,11 @@ def make_tissue_pull_segments(
         Segment(0.45, DemoState(solved["pick_low"], OPEN_GRIP), DemoState(solved["pick_low"], CLOSED_GRIP), carrying=False),
         Segment(0.7, DemoState(solved["pick_low"], CLOSED_GRIP), DemoState(solved["pull_up"], CLOSED_GRIP), carrying=True),
         Segment(0.9, DemoState(solved["pull_up"], CLOSED_GRIP), DemoState(solved["pull_mid"], CLOSED_GRIP), carrying=True),
-        Segment(0.9, DemoState(solved["pull_mid"], CLOSED_GRIP), DemoState(solved["pull_clear"], CLOSED_GRIP), carrying=True),
-        Segment(0.45, DemoState(solved["pull_clear"], CLOSED_GRIP), DemoState(solved["pull_clear"], CLOSED_GRIP), carrying=False, placed=True),
-        Segment(0.65, DemoState(solved["pull_clear"], CLOSED_GRIP), DemoState(solved["retreat"], OPEN_GRIP), carrying=False, placed=True),
+        Segment(0.75, DemoState(solved["pull_mid"], CLOSED_GRIP), DemoState(solved["pull_laydown"], CLOSED_GRIP), carrying=True),
+        Segment(0.65, DemoState(solved["pull_laydown"], CLOSED_GRIP), DemoState(solved["pull_clear"], CLOSED_GRIP), carrying=True),
+        Segment(0.45, DemoState(solved["pull_clear"], CLOSED_GRIP), DemoState(solved["pull_clear"], OPEN_GRIP), carrying=True),
+        Segment(0.25, DemoState(solved["pull_clear"], OPEN_GRIP), DemoState(solved["pull_clear"], OPEN_GRIP), carrying=False, placed=True),
+        Segment(0.65, DemoState(solved["pull_clear"], OPEN_GRIP), DemoState(solved["retreat"], OPEN_GRIP), carrying=False, placed=True),
     ]
 
 
@@ -515,6 +538,17 @@ def update_bowl_for_stage(
     carrying: bool,
     placed: bool,
 ) -> None:
+    if config.task_type == "tissue_pull":
+        if carrying:
+            object_pos = gripper_position(data, handles) + grasp_offset(config)
+            quat = flat_tissue_quat() if object_pos[2] <= config.plate_target[2] + 0.035 else None
+            set_task_object_pose(model, data, handles, object_pos, quat)
+        elif placed:
+            set_task_object_pose(model, data, handles, config.plate_target, flat_tissue_quat())
+        else:
+            set_task_object_pose(model, data, handles, config.bowl_start)
+        return
+
     if carrying:
         set_bowl_pose(model, data, handles, gripper_position(data, handles) + grasp_offset(config))
     elif placed:

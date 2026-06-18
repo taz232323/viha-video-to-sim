@@ -42,7 +42,7 @@
       "mjcf_body": "plate",
       "center_pixel": [610, 118],
       "estimated_radius_m": 0.07,
-      "body_origin_z_above_table_m": 0.245,
+      "body_origin_z_above_table_m": 0.006,
       "role": "pull_target"
     }
   ],

@@ -271,7 +271,7 @@ def write_annotated_spec(payload: dict) -> Path:
                 "mjcf_body": "plate",
                 "center_pixel": points["target"],
                 "estimated_radius_m": target_radius,
-                "body_origin_z_above_table_m": 0.245,
+                "body_origin_z_above_table_m": 0.006,
                 "role": "pull_target",
             },
         ]
