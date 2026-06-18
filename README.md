@@ -125,6 +125,7 @@ Render a review PNG:
 Start here:
 
 - `docs/PROJECT_HANDOFF.md` - what has been built so far and how to use it.
+- `docs/AI_ASSISTED_VIDEO_TO_SIM_PLAN.md` - plan for reducing manual annotation with AI-assisted drafts.
 - `sim/VIDEO_TO_SIM_PIPELINE.md` - detailed video-to-sim recording and processing pipeline.
 - `sim/README.md` - simulation-specific notes.
 - `sim/MEDIA_TO_FANUC_SIM.md` - shared media-to-sim notes and FANUC path.
