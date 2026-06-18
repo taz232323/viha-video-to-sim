@@ -227,8 +227,8 @@ def replace_body_with_tissue_sheet(body: ET.Element, half_width_m: float) -> Non
         if child.tag == "geom":
             body.remove(child)
 
-    sheet_length = max(0.09, half_width_m * 4.0)
-    sheet_drop = max(0.055, half_width_m * 2.3)
+    tab_height = max(0.055, half_width_m * 1.55)
+    tab_width = max(0.035, half_width_m * 1.05)
     thickness = 0.003
 
     ET.SubElement(
@@ -237,8 +237,8 @@ def replace_body_with_tissue_sheet(body: ET.Element, half_width_m: float) -> Non
         {
             "name": "tissue_sheet_collision",
             "type": "box",
-            "pos": f"{sheet_length * 0.42:.6f} 0 {-sheet_drop * 0.42:.6f}",
-            "size": f"{sheet_length * 0.5:.6f} {thickness:.6f} {sheet_drop * 0.5:.6f}",
+            "pos": f"0 0 {tab_height * 0.42:.6f}",
+            "size": f"{tab_width * 0.5:.6f} {thickness:.6f} {tab_height * 0.5:.6f}",
             "rgba": "0.97 0.98 0.96 0.92",
             "mass": "0.012",
             "friction": "1.0 0.02 0.001",
@@ -250,9 +250,37 @@ def replace_body_with_tissue_sheet(body: ET.Element, half_width_m: float) -> Non
         {
             "name": "tissue_fold_top",
             "type": "box",
-            "pos": "0 0 0.006",
-            "size": f"{half_width_m:.6f} {thickness * 1.25:.6f} 0.009",
+            "pos": f"{-tab_width * 0.16:.6f} 0 {tab_height * 0.92:.6f}",
+            "euler": "0 12 0",
+            "size": f"{tab_width * 0.36:.6f} {thickness * 1.2:.6f} {tab_height * 0.28:.6f}",
             "rgba": "1 1 1 0.96",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_fold_side",
+            "type": "box",
+            "pos": f"{tab_width * 0.26:.6f} 0 {tab_height * 0.58:.6f}",
+            "euler": "0 -18 0",
+            "size": f"{tab_width * 0.24:.6f} {thickness * 1.2:.6f} {tab_height * 0.36:.6f}",
+            "rgba": "0.94 0.96 0.95 0.88",
+            "contype": "0",
+            "conaffinity": "0",
+        },
+    )
+    ET.SubElement(
+        body,
+        "geom",
+        {
+            "name": "tissue_inside_box",
+            "type": "box",
+            "pos": f"0 0 {-tab_height * 0.34:.6f}",
+            "size": f"{tab_width * 0.44:.6f} {thickness * 1.1:.6f} {tab_height * 0.34:.6f}",
+            "rgba": "0.92 0.94 0.93 0.55",
             "contype": "0",
             "conaffinity": "0",
         },
@@ -263,7 +291,7 @@ def replace_body_with_tissue_sheet(body: ET.Element, half_width_m: float) -> Non
         {
             "name": "tissue_soft_edge",
             "type": "capsule",
-            "fromto": f"{sheet_length * 0.88:.6f} 0 {-sheet_drop * 0.88:.6f} {sheet_length:.6f} 0 {-sheet_drop:.6f}",
+            "fromto": f"{-tab_width * 0.35:.6f} 0 {tab_height:.6f} {tab_width * 0.32:.6f} 0 {tab_height * 1.06:.6f}",
             "size": "0.006",
             "rgba": "0.92 0.94 0.93 0.85",
             "contype": "0",
@@ -535,6 +563,12 @@ def update_scene_tree(
     calibration = spec["calibration"]
     table_surface_z = float(calibration.get("table_surface_z", 0.76))
     generated_objects = []
+    tissue_box = spec.get("scene_options", {}).get("tissue_box")
+    tissue_box_pixel = None
+    tissue_box_xy = None
+    if tissue_box and tissue_box.get("center_pixel"):
+        tissue_box_pixel = parse_xy(tissue_box["center_pixel"], "scene_options.tissue_box.center_pixel")
+        tissue_box_xy = apply_homography(homography, tissue_box_pixel)
 
     robot = spec.get("robot", {})
     robot_base = calibration.get("robot_base_world_xyz", calibration.get("fanuc_base_world_xyz"))
@@ -550,8 +584,11 @@ def update_scene_tree(
 
         center_pixel = parse_xy(item["center_pixel"], f"objects.{item.get('id', body_name)}.center_pixel")
         world_xy = apply_homography(homography, center_pixel)
+        body_xy = world_xy
+        if spec.get("task", {}).get("type") == "tissue_pull" and item.get("role") == "pick_object" and tissue_box_xy is not None:
+            body_xy = tissue_box_xy
         z_offset = float(item.get("body_origin_z_above_table_m", 0.0))
-        body_pos = np.array([world_xy[0], world_xy[1], table_surface_z + z_offset], dtype=float)
+        body_pos = np.array([body_xy[0], body_xy[1], table_surface_z + z_offset], dtype=float)
 
         body = body_by_name(root, body_name)
         body.set("pos", fmt_vec(body_pos))
@@ -564,20 +601,18 @@ def update_scene_tree(
                 "mjcf_body": body_name,
                 "center_pixel": center_pixel.round(3).tolist(),
                 "world_xy_m": world_xy.round(6).tolist(),
+                "body_world_xy_m": body_xy.round(6).tolist(),
                 "body_pos_m": body_pos.round(6).tolist(),
                 "estimated_radius_m": item.get("estimated_radius_m"),
             }
         )
 
-    tissue_box = spec.get("scene_options", {}).get("tissue_box")
     generated_tissue_box = None
-    if tissue_box and tissue_box.get("center_pixel"):
-        box_pixel = parse_xy(tissue_box["center_pixel"], "scene_options.tissue_box.center_pixel")
-        box_xy = apply_homography(homography, box_pixel)
-        add_tissue_box(root, box_xy, table_surface_z, float(tissue_box.get("size_m", 0.12)))
+    if tissue_box is not None and tissue_box_pixel is not None and tissue_box_xy is not None:
+        add_tissue_box(root, tissue_box_xy, table_surface_z, float(tissue_box.get("size_m", 0.12)))
         generated_tissue_box = {
-            "center_pixel": box_pixel.round(3).tolist(),
-            "world_xy_m": box_xy.round(6).tolist(),
+            "center_pixel": tissue_box_pixel.round(3).tolist(),
+            "world_xy_m": tissue_box_xy.round(6).tolist(),
             "size_m": float(tissue_box.get("size_m", 0.12)),
         }
 
