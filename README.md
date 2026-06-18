@@ -79,7 +79,9 @@ Open:
 http://127.0.0.1:8777
 ```
 
-The UI lets you upload a video, extract frames, click calibration/object/target points, build the JetArm sim, run it, and view the generated review PNG from the browser.
+The UI lets you upload a video, extract frames, click calibration/object/target points, build the JetArm sim, run it, open the live MuJoCo viewer, and view the generated review PNG from the browser.
+
+For the original cube-to-square test video, use `Use First-Test Cube Points` after upload to reproduce the first working calibration. Keep `Open live MuJoCo viewer after build` checked when you want the interactive simulation window, not only the PNG review sheet.
 
 Extract and select frames from the sample cube-to-square window plan:
 

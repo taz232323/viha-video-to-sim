@@ -4,6 +4,7 @@ import argparse
 import cgi
 import json
 import mimetypes
+import platform
 import shutil
 import subprocess
 import sys
@@ -54,6 +55,35 @@ def error_response(handler: BaseHTTPRequestHandler, message: str, status: int = 
 
 def run_command(command: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(command, cwd=ROOT, check=True, capture_output=True, text=True)
+
+
+def launch_live_sim(scene_path: Path) -> str:
+    mjpython = ROOT / ".venv" / "bin" / "mjpython"
+    if not mjpython.exists():
+        mjpython = PYTHON
+
+    command = (
+        f"cd {str(ROOT)!r} && "
+        f"{str(mjpython)!r} sim/run_jetarm_pick_place_demo.py --scene {rel_path(scene_path)!r}"
+    )
+    if platform.system() == "Darwin":
+        subprocess.Popen(
+            [
+                "osascript",
+                "-e",
+                f'tell application "Terminal" to do script "{command}"',
+                "-e",
+                'tell application "Terminal" to activate',
+            ],
+            cwd=ROOT,
+        )
+        return "Launched live MuJoCo viewer in Terminal."
+
+    subprocess.Popen(
+        [str(mjpython), "sim/run_jetarm_pick_place_demo.py", "--scene", rel_path(scene_path)],
+        cwd=ROOT,
+    )
+    return "Launched live MuJoCo viewer."
 
 
 def default_windows() -> list[dict]:
@@ -323,6 +353,9 @@ class VideoToSimHandler(BaseHTTPRequestHandler):
             if self.path == "/api/build":
                 self.handle_build()
                 return
+            if self.path == "/api/open-sim":
+                self.handle_open_sim()
+                return
             error_response(self, "Not found", HTTPStatus.NOT_FOUND)
         except Exception as exc:
             traceback.print_exc()
@@ -414,6 +447,10 @@ class VideoToSimHandler(BaseHTTPRequestHandler):
 
         result_path = ROOT / "outputs" / "generated" / f"{session_id}_scene_result.json"
         result = json.loads(result_path.read_text()) if result_path.exists() else {}
+        viewer_status = None
+        if payload.get("open_viewer"):
+            viewer_status = launch_live_sim(scene_path)
+
         json_response(
             self,
             {
@@ -427,9 +464,22 @@ class VideoToSimHandler(BaseHTTPRequestHandler):
                 "annotation_overlay_path": f"outputs/video_frames/{session_id}/annotated_video_points.jpg",
                 "success": result.get("success"),
                 "result": result,
+                "viewer_status": viewer_status,
                 "stdout": build.stdout + "\n" + review.stdout,
             },
         )
+
+    def handle_open_sim(self) -> None:
+        length = int(self.headers.get("Content-Length", "0"))
+        payload = json.loads(self.rfile.read(length).decode("utf-8"))
+        scene_value = payload.get("scene_path")
+        if not scene_value:
+            raise ValueError("scene_path is required")
+        scene_path = path_from_root(scene_value)
+        if not scene_path.exists():
+            raise FileNotFoundError(f"Scene not found: {scene_value}")
+        status = launch_live_sim(scene_path)
+        json_response(self, {"ok": True, "viewer_status": status, "scene_path": rel_path(scene_path)})
 
 
 def main() -> None:

@@ -55,6 +55,7 @@
               Click point: <strong id="currentPointLabel">front_left</strong>
             </div>
             <div id="pointList" class="point-list"></div>
+            <button id="cubePreset" type="button">Use First-Test Cube Points</button>
             <button id="undoPoint" type="button">Undo Last Point</button>
             <button id="resetPoints" type="button">Reset Points</button>
           </aside>
@@ -102,6 +103,10 @@
           <label>
             Target Half-Size/Radius (m)
             <input id="targetRadius" type="number" step="0.001" value="0.055" />
+          </label>
+          <label class="checkbox-label">
+            <input id="openViewer" type="checkbox" checked />
+            Open live MuJoCo viewer after build
           </label>
         </div>
         <button id="buildButton" class="primary" type="button">Build Sim And Review PNG</button>

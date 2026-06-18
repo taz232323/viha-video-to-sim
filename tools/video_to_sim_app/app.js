@@ -56,6 +56,15 @@ const results = document.getElementById("results");
 windowsInput.value = JSON.stringify(defaultWindows, null, 2);
 renderPointList();
 
+const firstCubePreset = {
+  front_left: [175, 1042],
+  front_right: [1605, 968],
+  back_right: [1515, 430],
+  back_left: [520, 415],
+  pick_object: [1325, 610],
+  target: [1398, 805]
+};
+
 function artifactUrl(path) {
   return `/artifact?path=${encodeURIComponent(path)}`;
 }
@@ -221,6 +230,22 @@ document.getElementById("resetPoints").addEventListener("click", () => {
   drawAnnotations();
 });
 
+document.getElementById("cubePreset").addEventListener("click", () => {
+  points = JSON.parse(JSON.stringify(firstCubePreset));
+  currentPointIndex = pointOrder.length;
+  document.getElementById("taskType").value = "cube_to_square";
+  document.getElementById("tableWidth").value = "0.90";
+  document.getElementById("tableDepth").value = "0.60";
+  document.getElementById("tableZ").value = "0.765";
+  document.getElementById("robotX").value = "-0.16";
+  document.getElementById("robotY").value = "-0.10";
+  document.getElementById("robotZ").value = "0.765";
+  document.getElementById("objectRadius").value = "0.022";
+  document.getElementById("targetRadius").value = "0.055";
+  renderPointList();
+  drawAnnotations();
+});
+
 window.addEventListener("resize", () => {
   resizeCanvas();
   drawAnnotations();
@@ -257,7 +282,8 @@ document.getElementById("buildButton").addEventListener("click", async (event) =
       base_z_m: Number(document.getElementById("robotZ").value)
     },
     object_radius_m: Number(document.getElementById("objectRadius").value),
-    target_radius_m: Number(document.getElementById("targetRadius").value)
+    target_radius_m: Number(document.getElementById("targetRadius").value),
+    open_viewer: document.getElementById("openViewer").checked
   };
 
   try {
@@ -293,6 +319,22 @@ function renderResults(data) {
     a.target = "_blank";
     a.textContent = label;
     links.appendChild(a);
+  }
+
+  if (data.scene_path) {
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.textContent = "Open Live Simulation";
+    openButton.addEventListener("click", async () => {
+      const response = await fetch("/api/open-sim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scene_path: data.scene_path })
+      });
+      const result = await response.json();
+      buildStatus.textContent = result.ok ? result.viewer_status : result.error;
+    });
+    links.appendChild(openButton);
   }
 
   const review = document.createElement("img");

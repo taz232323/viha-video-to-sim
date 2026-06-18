@@ -269,10 +269,12 @@ The UI currently supports:
 - Automatic frame extraction through `sim/extract_video_frames.py`.
 - Selected-frame preview.
 - Manual point clicking on the representative frame.
+- A first-test cube preset that reproduces the original working cube-to-square calibration.
 - Cube/object-to-square or orange-to-bowl preset.
 - Spec generation.
 - MuJoCo build/run.
 - Review PNG generation.
+- Live MuJoCo viewer launch after build.
 - Links to generated spec, scene, result JSON, annotation overlay, and review sheet.
 
 Click order:
@@ -287,6 +289,8 @@ target
 ```
 
 This is the preferred path for future tests because the process now lives in code instead of relying on manual terminal orchestration.
+
+If the robot or objects look far away from the video, the usual cause is point calibration: the table corners were clicked in the wrong order, or the table dimensions/base position do not match the recording. For the original cube-to-square recording, the UI shortcut `Use First-Test Cube Points` restores the calibration that matched the first successful manual run.
 
 ### 12. FANUC Compatibility
 
