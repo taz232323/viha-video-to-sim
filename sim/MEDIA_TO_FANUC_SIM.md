@@ -22,6 +22,7 @@ The first version expects manual annotations in JSON: table corner pixels, objec
 - `sim/video_specs/fanuc_video_task_spec_template.json` - video/representative-frame template.
 - `sim/build_fanuc_scene_from_media.py` - builds a generated MJCF scene and metadata.
 - `sim/run_pick_place_demo.py` - runs the FANUC sim; now accepts generated scenes with `--scene`.
+- `sim/run_dual_fanuc_buffing_demo.py` - hand-authored two-arm FANUC metal buffing process demo.
 
 ## Generate And Run A Scenario
 
@@ -48,6 +49,37 @@ You can also run any generated scene directly:
   --scene outputs/generated/fanuc_sample_photo_scene.xml \
   --snapshot outputs/generated/fanuc_sample_photo_scene_snapshot.png \
   --result-json outputs/generated/fanuc_sample_photo_scene_result.json
+```
+
+## Dual FANUC Metal Buffing Demo
+
+The buffing demo is currently hand-authored from the shop reference videos/photos rather than automatically reconstructed from video. It is useful as a process target for the eventual media pipeline:
+
+```text
+shop/video references
+  -> identify sheet, fixture, buffing tool, and cooperative-arm roles
+  -> generate two-arm CR-7iA/L workcell
+  -> run holder clamp + four buff passes
+  -> save review PNG + success result JSON
+```
+
+Run:
+
+```bash
+.venv/bin/python sim/run_dual_fanuc_buffing_demo.py --headless --review
+```
+
+The result JSON reports:
+
+```json
+{
+  "success": true,
+  "holder_clamped": true,
+  "completed_buff_passes": 4,
+  "required_buff_passes": 4,
+  "coverage_fraction": 1.0,
+  "stage": "success"
+}
 ```
 
 ## Result Contract

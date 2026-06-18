@@ -86,6 +86,29 @@ def launch_live_sim(scene_path: Path) -> str:
     return "Launched live MuJoCo viewer."
 
 
+def launch_dual_fanuc_buffing_demo() -> str:
+    mjpython = ROOT / ".venv" / "bin" / "mjpython"
+    if not mjpython.exists():
+        mjpython = PYTHON
+
+    command = f"cd {str(ROOT)!r} && {str(mjpython)!r} sim/run_dual_fanuc_buffing_demo.py"
+    if platform.system() == "Darwin":
+        subprocess.Popen(
+            [
+                "osascript",
+                "-e",
+                f'tell application "Terminal" to do script "{command}"',
+                "-e",
+                'tell application "Terminal" to activate',
+            ],
+            cwd=ROOT,
+        )
+        return "Launched dual FANUC buffing MuJoCo viewer in Terminal."
+
+    subprocess.Popen([str(mjpython), "sim/run_dual_fanuc_buffing_demo.py"], cwd=ROOT)
+    return "Launched dual FANUC buffing MuJoCo viewer."
+
+
 def default_windows() -> list[dict]:
     return [
         {
@@ -395,6 +418,9 @@ class VideoToSimHandler(BaseHTTPRequestHandler):
             if self.path == "/api/open-sim":
                 self.handle_open_sim()
                 return
+            if self.path == "/api/fanuc-buffing-demo":
+                self.handle_fanuc_buffing_demo()
+                return
             error_response(self, "Not found", HTTPStatus.NOT_FOUND)
         except Exception as exc:
             traceback.print_exc()
@@ -519,6 +545,41 @@ class VideoToSimHandler(BaseHTTPRequestHandler):
             raise FileNotFoundError(f"Scene not found: {scene_value}")
         status = launch_live_sim(scene_path)
         json_response(self, {"ok": True, "viewer_status": status, "scene_path": rel_path(scene_path)})
+
+    def handle_fanuc_buffing_demo(self) -> None:
+        length = int(self.headers.get("Content-Length", "0"))
+        payload = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+        command = [
+            str(PYTHON),
+            "sim/run_dual_fanuc_buffing_demo.py",
+            "--headless",
+            "--review",
+        ]
+        completed = run_command(command)
+
+        result_path = ROOT / "outputs" / "generated" / "dual_fanuc_metal_buffing_result.json"
+        review_path = ROOT / "outputs" / "generated" / "dual_fanuc_metal_buffing_review_sheet.png"
+        snapshot_path = ROOT / "outputs" / "generated" / "dual_fanuc_metal_buffing_snapshot.png"
+        scene_path = ROOT / "outputs" / "generated" / "dual_fanuc_metal_buffing_scene.xml"
+        result = json.loads(result_path.read_text()) if result_path.exists() else {}
+        viewer_status = None
+        if payload.get("open_viewer"):
+            viewer_status = launch_dual_fanuc_buffing_demo()
+
+        json_response(
+            self,
+            {
+                "ok": True,
+                "scene_path": rel_path(scene_path),
+                "review_sheet_path": rel_path(review_path),
+                "snapshot_path": rel_path(snapshot_path),
+                "result_path": rel_path(result_path),
+                "success": result.get("success"),
+                "result": result,
+                "viewer_status": viewer_status,
+                "stdout": completed.stdout,
+            },
+        )
 
 
 def main() -> None:

@@ -35,6 +35,13 @@ header p {
   color: #b7c0ca;
 }
 
+.section-note {
+  margin-bottom: 12px;
+  color: #b7c0ca;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 main {
   display: grid;
   grid-template-columns: minmax(320px, 420px) minmax(320px, 1fr);

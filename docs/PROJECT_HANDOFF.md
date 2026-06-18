@@ -239,7 +239,41 @@ The review sheet shows:
 
 Going forward, each new video-derived sim should produce one review PNG.
 
-### 11. Local Upload/Annotation UI
+### 11. Dual FANUC Metal Buffing Workcell
+
+A new process simulation was added for the metal buffing use case shown in the provided shop videos/photos:
+
+```text
+FANUC arm A holds a sheet-metal part with a pneumatic/vacuum fixture
+  -> FANUC arm B approaches with a buffing wheel
+  -> buffing arm runs four passes over the clamped sheet
+  -> success is true when the sheet is clamped and all passes complete
+```
+
+Important file:
+
+- `sim/run_dual_fanuc_buffing_demo.py`
+
+The scene includes two CR-7iA/L-style arms, a metal worktable, fixture rails, sheet holes/slots, a buffing wheel tool, pneumatic holder tooling, stacked sheet metal, shelves, shop wall panels, overhead lighting, and status lights.
+
+Run:
+
+```bash
+.venv/bin/python sim/run_dual_fanuc_buffing_demo.py --headless --review
+```
+
+Outputs:
+
+```text
+outputs/generated/dual_fanuc_metal_buffing_scene.xml
+outputs/generated/dual_fanuc_metal_buffing_review_sheet.png
+outputs/generated/dual_fanuc_metal_buffing_snapshot.png
+outputs/generated/dual_fanuc_metal_buffing_result.json
+```
+
+The local upload UI also has a `FANUC Buffing Demo` button that runs this simulation and shows the review artifacts in the browser.
+
+### 12. Local Upload/Annotation UI
 
 The newest workflow is browser-driven instead of manually running every command.
 
@@ -292,7 +326,7 @@ This is the preferred path for future tests because the process now lives in cod
 
 If the robot or objects look far away from the video, the usual cause is point calibration: the table corners were clicked in the wrong order, or the table dimensions/base position do not match the recording. For the original cube-to-square recording, the UI shortcut `Use First-Test Cube Points` restores the calibration that matched the first successful manual run.
 
-### 12. FANUC Compatibility
+### 13. FANUC Compatibility
 
 The same video-to-sim perception process should work for FANUC:
 
@@ -317,7 +351,7 @@ Relevant files:
 - `sim/video_specs/fanuc_video_task_spec_template.json`
 - `sim/MEDIA_TO_FANUC_SIM.md`
 
-### 13. Saved For Later: ABC
+### 14. Saved For Later: ABC
 
 `amazon-far/abc` was reviewed and saved as a future option.
 

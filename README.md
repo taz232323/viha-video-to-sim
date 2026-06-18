@@ -11,6 +11,7 @@ The project now supports:
 - Clean-frame selection and selected-frame manifests.
 - First-pass video-derived scene generation.
 - A tissue-from-box JetArm task preset with a tissue box, tissue sheet, pull-clear target, and success check.
+- A dual-FANUC CR-7iA/L metal buffing workcell demo with a pneumatic holder arm, buffing-tool arm, shop environment, review PNG, and success predicate.
 - Review PNG sheets so a user can inspect sim stages without replaying the terminal viewer.
 
 ## Current Workflow
@@ -82,6 +83,8 @@ http://127.0.0.1:8777
 
 The UI lets you upload a video, extract frames, click calibration/object/target points, build the JetArm sim, run it, open the live MuJoCo viewer, and view the generated review PNG from the browser.
 
+The same UI also includes a dedicated `FANUC Buffing Demo` button. It builds a two-arm metal buffing process simulation and returns a review PNG, snapshot, generated scene XML, and result JSON.
+
 For the original cube-to-square test video, use `Use First-Test Cube Points` after upload to reproduce the first working calibration. Keep `Open live MuJoCo viewer after build` checked when you want the interactive simulation window, not only the PNG review sheet.
 
 Extract and select frames from the sample cube-to-square window plan:
@@ -108,11 +111,24 @@ Render a review PNG:
   --output outputs/generated/cube_to_square_video_review_sheet.png
 ```
 
+Run the dual-FANUC metal buffing demo directly:
+
+```bash
+.venv/bin/python sim/run_dual_fanuc_buffing_demo.py --headless --review
+```
+
+Open the interactive dual-FANUC viewer on macOS:
+
+```bash
+.venv/bin/mjpython sim/run_dual_fanuc_buffing_demo.py
+```
+
 ## Main Files
 
 - `sim/run_jetarm_pick_place_demo.py` - JetArm MuJoCo runner and task success logic.
 - `sim/build_jetarm_scene_from_media.py` - JetArm wrapper around the shared media-to-scene builder.
 - `sim/build_fanuc_scene_from_media.py` - shared media/photo/video scene builder.
+- `sim/run_dual_fanuc_buffing_demo.py` - dual FANUC CR-7iA/L metal buffing workcell demo.
 - `sim/extract_video_frames.py` - video window extraction and clean-frame selection.
 - `sim/render_jetarm_review_sheet.py` - creates a labeled review PNG from a sim timeline.
 - `sim/VIDEO_TO_SIM_PIPELINE.md` - detailed video-to-sim process.

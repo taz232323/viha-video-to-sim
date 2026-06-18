@@ -8,6 +8,8 @@ This local web app turns the manual video workflow into a browser-guided process
 4. Build a JetArm MuJoCo scene.
 5. Run the sim, optionally open the live MuJoCo viewer, and create a review PNG.
 
+It also includes a dedicated dual-FANUC buffing demo button for the metal-sheet workcell. That path does not require frame annotation yet; it builds the process simulation directly from the hand-modeled FANUC/shop/buffing setup.
+
 Run from the repo root:
 
 ```bash
@@ -37,6 +39,7 @@ The app writes generated files under `outputs/`, which is ignored by Git.
 
 - `Use First-Test Cube Points` restores the approximate point calibration used for the original cube-to-square demo video.
 - `Open live MuJoCo viewer after build` launches the actual interactive simulation window after the scene is generated.
+- `Build FANUC Buffing Review PNG` generates the two-arm metal buffing workcell review sheet, result JSON, snapshot, and scene XML.
 
 ## Notes
 

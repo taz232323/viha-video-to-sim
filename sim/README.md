@@ -77,6 +77,36 @@ The JetArm gripper is sized around the simulated bowl: the open span leaves clea
 
 Use those waypoints as a calibration artifact, not direct hardware-safe commands. Before moving the physical JetArm, confirm servo IDs, zero offsets, joint signs, angle limits, gripper open/close pulses, speed limits, and clearances in the real workspace.
 
+## Dual FANUC Metal Buffing Demo
+
+The dual-FANUC demo models a metal buffing workcell from the shop reference photos/videos:
+
+- Left CR-7iA/L-style arm holds the sheet with a pneumatic/vacuum fixture.
+- Right CR-7iA/L-style arm carries a motorized buffing wheel.
+- The workcell includes a metal table, fixture rails, sheet holes/slots, stacked sheet metal, shelves, corrugated wall panels, lights, and a status panel.
+- Success requires the holder to be clamped and all four buffing passes to complete.
+
+Run the headless validation and generate a review PNG:
+
+```bash
+python sim/run_dual_fanuc_buffing_demo.py --headless --review
+```
+
+Open the interactive viewer on macOS:
+
+```bash
+mjpython sim/run_dual_fanuc_buffing_demo.py
+```
+
+Generated artifacts:
+
+```text
+outputs/generated/dual_fanuc_metal_buffing_scene.xml
+outputs/generated/dual_fanuc_metal_buffing_review_sheet.png
+outputs/generated/dual_fanuc_metal_buffing_snapshot.png
+outputs/generated/dual_fanuc_metal_buffing_result.json
+```
+
 ## JetArm Hardware Dry Run
 
 The hardware bridge lives on the robot at `~/viha_jetarm/jetarm_hardware_bridge.py` and locally at:

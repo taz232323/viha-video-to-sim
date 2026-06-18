@@ -319,17 +319,43 @@ document.getElementById("buildButton").addEventListener("click", async (event) =
   }
 });
 
+document.getElementById("fanucBuffingButton").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  button.dataset.originalLabel = button.textContent;
+  setBusy(button, true, "Building...");
+  buildStatus.textContent = "Building dual FANUC buffing workcell, running success check, and rendering review PNG...";
+
+  try {
+    const response = await fetch("/api/fanuc-buffing-demo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ open_viewer: document.getElementById("openFanucViewer").checked })
+    });
+    const data = await response.json();
+    if (!data.ok) throw new Error(data.error || "FANUC buffing demo failed");
+    buildStatus.textContent = `SUCCESS=${data.success}\n${data.stdout}`;
+    renderResults(data);
+  } catch (error) {
+    buildStatus.textContent = error.message;
+  } finally {
+    setBusy(button, false);
+  }
+});
+
 function renderResults(data) {
   results.innerHTML = "";
   const links = document.createElement("div");
   links.className = "artifact-links";
-  for (const [label, path] of [
+  const artifacts = [
     ["Review PNG", data.review_sheet_path],
     ["Annotation Overlay", data.annotation_overlay_path],
+    ["Snapshot PNG", data.snapshot_path],
     ["Scene XML", data.scene_path],
     ["Result JSON", data.result_path],
     ["Spec JSON", data.spec_path]
-  ]) {
+  ].filter((item) => item[1]);
+
+  for (const [label, path] of artifacts) {
     const a = document.createElement("a");
     a.href = artifactUrl(path);
     a.target = "_blank";
@@ -355,8 +381,11 @@ function renderResults(data) {
 
   const review = document.createElement("img");
   review.src = artifactUrl(data.review_sheet_path);
-  const overlay = document.createElement("img");
-  overlay.src = artifactUrl(data.annotation_overlay_path);
+  results.append(links, review);
 
-  results.append(links, review, overlay);
+  if (data.annotation_overlay_path) {
+    const overlay = document.createElement("img");
+    overlay.src = artifactUrl(data.annotation_overlay_path);
+    results.appendChild(overlay);
+  }
 }
