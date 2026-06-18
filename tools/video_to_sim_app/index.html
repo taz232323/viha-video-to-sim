@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ViHa Video-To-Sim</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>ViHa Video-To-Sim</h1>
+        <p>Upload a tabletop task video, select frames, annotate the scene, and build a JetArm MuJoCo simulation.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>1. Upload Video</h2>
+        <form id="uploadForm">
+          <label>
+            Session ID
+            <input name="session_id" id="sessionId" value="cube_to_square_ui_001" />
+          </label>
+          <label>
+            Video
+            <input name="video" type="file" accept="video/*" required />
+          </label>
+          <label>
+            Candidate FPS
+            <input name="candidate_fps" type="number" step="0.5" min="1" value="4" />
+          </label>
+          <label>
+            Windows JSON
+            <textarea name="windows" id="windowsInput" rows="11"></textarea>
+          </label>
+          <button type="submit" class="primary">Upload And Extract Frames</button>
+        </form>
+        <pre id="uploadStatus"></pre>
+      </section>
+
+      <section class="panel">
+        <h2>2. Selected Frames</h2>
+        <div id="selectedFrames" class="frame-grid"></div>
+      </section>
+
+      <section class="panel wide">
+        <h2>3. Annotate Representative Frame</h2>
+        <div class="annotator-layout">
+          <div>
+            <canvas id="annotationCanvas"></canvas>
+          </div>
+          <aside>
+            <div class="current-point">
+              Click point: <strong id="currentPointLabel">front_left</strong>
+            </div>
+            <div id="pointList" class="point-list"></div>
+            <button id="undoPoint" type="button">Undo Last Point</button>
+            <button id="resetPoints" type="button">Reset Points</button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>4. Build Simulation</h2>
+        <div class="grid-form">
+          <label>
+            Task Type
+            <select id="taskType">
+              <option value="cube_to_square">Cube/Object To Square</option>
+              <option value="orange_to_bowl">Orange To Bowl</option>
+            </select>
+          </label>
+          <label>
+            Table Width (m)
+            <input id="tableWidth" type="number" step="0.01" value="0.90" />
+          </label>
+          <label>
+            Table Depth (m)
+            <input id="tableDepth" type="number" step="0.01" value="0.60" />
+          </label>
+          <label>
+            Table Surface Z (m)
+            <input id="tableZ" type="number" step="0.001" value="0.765" />
+          </label>
+          <label>
+            Robot Base X (m)
+            <input id="robotX" type="number" step="0.01" value="-0.16" />
+          </label>
+          <label>
+            Robot Base Y (m)
+            <input id="robotY" type="number" step="0.01" value="-0.10" />
+          </label>
+          <label>
+            Robot Base Z (m)
+            <input id="robotZ" type="number" step="0.001" value="0.765" />
+          </label>
+          <label>
+            Object Half-Size/Radius (m)
+            <input id="objectRadius" type="number" step="0.001" value="0.022" />
+          </label>
+          <label>
+            Target Half-Size/Radius (m)
+            <input id="targetRadius" type="number" step="0.001" value="0.055" />
+          </label>
+        </div>
+        <button id="buildButton" class="primary" type="button">Build Sim And Review PNG</button>
+        <pre id="buildStatus"></pre>
+      </section>
+
+      <section class="panel wide">
+        <h2>5. Results</h2>
+        <div id="results"></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -239,7 +239,56 @@ The review sheet shows:
 
 Going forward, each new video-derived sim should produce one review PNG.
 
-### 11. FANUC Compatibility
+### 11. Local Upload/Annotation UI
+
+The newest workflow is browser-driven instead of manually running every command.
+
+Files:
+
+- `tools/video_to_sim_app/server.py`
+- `tools/video_to_sim_app/index.html`
+- `tools/video_to_sim_app/app.js`
+- `tools/video_to_sim_app/style.css`
+- `tools/video_to_sim_app/README.md`
+
+Run:
+
+```bash
+.venv/bin/python tools/video_to_sim_app/server.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:8777
+```
+
+The UI currently supports:
+
+- Video upload.
+- Automatic frame extraction through `sim/extract_video_frames.py`.
+- Selected-frame preview.
+- Manual point clicking on the representative frame.
+- Cube/object-to-square or orange-to-bowl preset.
+- Spec generation.
+- MuJoCo build/run.
+- Review PNG generation.
+- Links to generated spec, scene, result JSON, annotation overlay, and review sheet.
+
+Click order:
+
+```text
+front_left
+front_right
+back_right
+back_left
+pick_object
+target
+```
+
+This is the preferred path for future tests because the process now lives in code instead of relying on manual terminal orchestration.
+
+### 12. FANUC Compatibility
 
 The same video-to-sim perception process should work for FANUC:
 
@@ -264,7 +313,7 @@ Relevant files:
 - `sim/video_specs/fanuc_video_task_spec_template.json`
 - `sim/MEDIA_TO_FANUC_SIM.md`
 
-### 12. Saved For Later: ABC
+### 13. Saved For Later: ABC
 
 `amazon-far/abc` was reviewed and saved as a future option.
 

@@ -279,6 +279,7 @@ The first code pass includes:
 
 - `tools/video_recorder/index.html` - local Chrome recorder page.
 - `tools/video_recorder/README.md` - recorder launch instructions.
+- `tools/video_to_sim_app/` - local upload, annotation, sim-build, and review UI.
 - `inputs/video_plans/cube_to_square_window_plan_template.json` - starter window plan.
 - `sim/extract_video_frames.py` - extracts candidate frames and picks clean frames by sharpness/contrast.
 - `sim/video_specs/jetarm_video_task_spec_template.json` - JetArm video-to-scene template.
@@ -335,6 +336,32 @@ outputs/video_frames/cube_to_square_test_001/jetarm_video_task_spec.json
 ```
 
 The selector currently uses sharpness/contrast scoring. Katna can be added as a second selector once the basic video path works.
+
+### Use The Upload UI
+
+The easiest path is now:
+
+```bash
+.venv/bin/python tools/video_to_sim_app/server.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:8777
+```
+
+The UI handles:
+
+```text
+video upload
+  -> frame extraction
+  -> selected-frame preview
+  -> point annotation
+  -> spec generation
+  -> MuJoCo run
+  -> review PNG
+```
 
 ### Robot In Frame
 

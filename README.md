@@ -67,6 +67,20 @@ Download recordings into:
 inputs/videos/
 ```
 
+Or use the newer all-in-one local upload UI:
+
+```bash
+.venv/bin/python tools/video_to_sim_app/server.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:8777
+```
+
+The UI lets you upload a video, extract frames, click calibration/object/target points, build the JetArm sim, run it, and view the generated review PNG from the browser.
+
 Extract and select frames from the sample cube-to-square window plan:
 
 ```bash
@@ -100,6 +114,7 @@ Render a review PNG:
 - `sim/render_jetarm_review_sheet.py` - creates a labeled review PNG from a sim timeline.
 - `sim/VIDEO_TO_SIM_PIPELINE.md` - detailed video-to-sim process.
 - `sim/video_specs/jetarm_video_task_spec_template.json` - JetArm video scene template.
+- `tools/video_to_sim_app/server.py` - local upload/annotation/build web app.
 - `tools/video_recorder/index.html` - local Chrome recorder.
 - `inputs/video_plans/cube_to_square_window_plan_template.json` - starter video window plan.
 
