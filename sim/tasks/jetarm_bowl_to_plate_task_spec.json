@@ -1,0 +1,95 @@
+{
+  "task_description": "Use the Hiwonder JetArm prototype scene to pick up bowl_0 and place it into target_bowl_0.",
+  "scene": "sim/worlds/table_bowl_pick_place_jetarm.xml",
+  "robot": {
+    "id": "hiwonder_jetarm",
+    "label": "Hiwonder JetArm approximate 6DOF desktop arm",
+    "controlled_axes": 6,
+    "control_style": "serial bus servos through JetArm/ROS control stack",
+    "hardware_note": "JetArm documentation describes a desktop AI vision robotic arm with 3D depth camera and ROS support; related Hiwonder arm docs describe 6DOF bus-servo arms with UART serial command control.",
+    "model_note": "Hand-authored MJCF approximation for trajectory prototyping. Servo zero offsets, joint signs, limits, and payload must be calibrated against the physical JetArm before sending commands."
+  },
+  "objects": [
+    {
+      "id": "bowl_0",
+      "label": "small bowl",
+      "mjcf_body": "bowl",
+      "init_pose": [-0.13, -0.04, 0.79, 1, 0, 0, 0],
+      "physics": {
+        "mass_kg": 0.045,
+        "friction": [0.95, 0.02, 0.001],
+        "estimated": true
+      }
+    },
+    {
+      "id": "target_bowl_0",
+      "label": "target bowl",
+      "mjcf_body": "plate",
+      "init_pose": [0.12, 0.04, 0.765, 1, 0, 0, 0],
+      "physics": {
+        "static": true
+      }
+    },
+    {
+      "id": "table_0",
+      "label": "table",
+      "mjcf_body": "table",
+      "support_surface_z": 0.76,
+      "workspace_bounds": [-0.55, -0.36, 0.42, 0.36]
+    }
+  ],
+  "goal_predicates": ["In(bowl_0, target_bowl_0)"],
+  "stages": [
+    {
+      "name": "approach_bowl",
+      "check": "Near(gripper_site, bowl_0)"
+    },
+    {
+      "name": "grasp_bowl",
+      "check": "Grasped(bowl_0)"
+    },
+    {
+      "name": "lift_bowl",
+      "check": "Lifted(bowl_0, table_0)"
+    },
+    {
+      "name": "place_bowl",
+      "check": "In(bowl_0, target_bowl_0)"
+    }
+  ],
+  "success": {
+    "all_of": ["In(bowl_0, target_bowl_0)"],
+    "settle_steps": 50,
+    "runtime_signal": "run_jetarm_pick_place_demo.py prints TASK COMPLETE when task_success(state) is true"
+  },
+  "constraints": {
+    "workspace_bounds": [-0.55, -0.36, 0.42, 0.36],
+    "ordering": "stages_in_order",
+    "forbidden": ["dropped(bowl_0)", "collision(robot, tabletop_background_objects)"]
+  },
+  "predicate_defs": {
+    "In": {
+      "type": "support_contact",
+      "support": "target_bowl_0",
+      "object": "bowl_0",
+      "xy_distance_tol": 0.055,
+      "z_min": 0.82,
+      "z_max": 0.9
+    },
+    "Near": {
+      "type": "site_to_body_distance",
+      "distance_tol": 0.055
+    },
+    "Grasped": {
+      "type": "in_gripper_and_lifted",
+      "gripper_site": "gripper_site",
+      "distance_tol": 0.045,
+      "lift_above_table": 0.035
+    },
+    "Lifted": {
+      "type": "body_z_above_support",
+      "support_z": 0.76,
+      "z_delta": 0.06
+    }
+  }
+}

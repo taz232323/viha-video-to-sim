@@ -1,0 +1,56 @@
+{
+  "description": "Template for turning one calibrated photo into a JetArm pick-and-place sim.",
+  "image_path": "/absolute/path/to/table_scene_photo.jpg",
+  "robot": {
+    "id": "hiwonder_jetarm",
+    "base_frame_note": "All final coordinates are relative to the JetArm base frame on the table."
+  },
+  "calibration": {
+    "method": "tabletop_homography",
+    "units": "meters",
+    "table_real_size": {
+      "width_x": 0.78,
+      "depth_y": 0.48
+    },
+    "table_corners_pixels": {
+      "front_left": [120, 820],
+      "front_right": [1020, 790],
+      "back_right": [920, 330],
+      "back_left": [180, 310]
+    },
+    "table_corners_world": {
+      "front_left": [-0.39, -0.24],
+      "front_right": [0.39, -0.24],
+      "back_right": [0.39, 0.24],
+      "back_left": [-0.39, 0.24]
+    },
+    "jetarm_base_world_xy": [-0.35, -0.22],
+    "table_surface_z": 0.76
+  },
+  "objects": [
+    {
+      "id": "bowl_0",
+      "label": "bowl",
+      "center_pixel": [455, 520],
+      "estimated_radius_m": 0.06,
+      "grasp_height_above_table_m": 0.08
+    },
+    {
+      "id": "plate_0",
+      "label": "plate",
+      "center_pixel": [650, 500],
+      "estimated_radius_m": 0.105,
+      "place_height_above_table_m": 0.085
+    }
+  ],
+  "task": {
+    "type": "pick_and_place",
+    "pick_object": "bowl_0",
+    "place_target": "plate_0"
+  },
+  "safety": {
+    "dry_run_first": true,
+    "max_speed_scale": 0.25,
+    "require_human_clearance_check": true
+  }
+}

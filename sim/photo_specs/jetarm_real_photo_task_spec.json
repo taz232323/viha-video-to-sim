@@ -1,0 +1,69 @@
+{
+  "description": "Approximate real-photo JetArm scenario from IMG_4990. Board scale: every 5 printed units equals 2 inches.",
+  "source": {
+    "type": "image",
+    "image_path": "/Users/amardesai/Library/Messages/Attachments/99/09/3A13BB9D-6838-42DF-932C-81B748D99D24/IMG_4990.jpeg"
+  },
+  "robot": {
+    "id": "hiwonder_jetarm",
+    "base_body": "hiwonder_jetarm",
+    "base_frame_note": "Pixel annotations are approximate. Use a click-to-annotate pass before treating results as calibration evidence."
+  },
+  "calibration": {
+    "method": "tabletop_homography",
+    "units": "meters",
+    "board_scale_note": "5 board units = 2 inches = 0.0508 m; 1 board unit = 0.01016 m.",
+    "board_unit_m": 0.01016,
+    "table_surface_z": 0.76,
+    "table_corners_pixels": {
+      "front_left": [1640, 4050],
+      "front_right": [4780, 4050],
+      "back_right": [3970, 860],
+      "back_left": [2100, 860]
+    },
+    "table_corners_world": {
+      "front_left": [-0.32, -0.26],
+      "front_right": [0.32, -0.26],
+      "back_right": [0.32, 0.26],
+      "back_left": [-0.32, 0.26]
+    },
+    "robot_base_world_xyz": [0.0, 0.12, 0.765]
+  },
+  "objects": [
+    {
+      "id": "bowl_0",
+      "label": "orange",
+      "mjcf_body": "bowl",
+      "center_pixel": [3450, 2970],
+      "estimated_radius_m": 0.035,
+      "body_origin_z_above_table_m": 0.035,
+      "role": "pick_object"
+    },
+    {
+      "id": "target_bowl_0",
+      "label": "target_bowl",
+      "mjcf_body": "plate",
+      "center_pixel": [2250, 3120],
+      "estimated_radius_m": 0.105,
+      "body_origin_z_above_table_m": 0.005,
+      "role": "place_target"
+    }
+  ],
+  "task": {
+    "type": "pick_and_place",
+    "pick_object": "bowl_0",
+    "place_target": "target_bowl_0"
+  },
+  "scene_options": {
+    "minimal_photo_scene": true,
+    "object_shapes": {
+      "bowl_0": "orange_sphere"
+    }
+  },
+  "outputs": {
+    "scene_xml": "outputs/generated/jetarm_real_photo_scene.xml",
+    "metadata_json": "outputs/generated/jetarm_real_photo_scene_metadata.json",
+    "snapshot_png": "outputs/generated/jetarm_real_photo_scene_snapshot.png",
+    "result_json": "outputs/generated/jetarm_real_photo_scene_result.json"
+  }
+}

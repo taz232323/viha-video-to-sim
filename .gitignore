@@ -1,0 +1,11 @@
+.venv/
+tmp/
+__pycache__/
+*.pyc
+MUJOCO_LOG.TXT
+.codex_work/
+
+# Local recordings and generated artifacts.
+inputs/videos/
+outputs/
+dist/

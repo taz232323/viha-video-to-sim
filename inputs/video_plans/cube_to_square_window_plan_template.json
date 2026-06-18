@@ -1,0 +1,37 @@
+{
+  "session_id": "cube_to_square_test_001",
+  "video_path": "../videos/cube_to_square_test_001.webm",
+  "output_dir": "../../outputs/video_frames/cube_to_square_test_001",
+  "candidate_fps": 4,
+  "selected_frames_per_window": 1,
+  "windows": [
+    {
+      "name": "scene_reference",
+      "start_sec": 0.5,
+      "end_sec": 2.0,
+      "purpose": "Full table, robot base, cube, target square, and calibration marker visible."
+    },
+    {
+      "name": "pre_pick",
+      "start_sec": 2.0,
+      "end_sec": 4.0,
+      "purpose": "Cube visible before the human touches it."
+    },
+    {
+      "name": "pre_place",
+      "start_sec": 5.0,
+      "end_sec": 7.0,
+      "purpose": "Target square visible before the cube is placed."
+    },
+    {
+      "name": "post_place",
+      "start_sec": 7.0,
+      "end_sec": 9.0,
+      "purpose": "Cube resting on the target square."
+    }
+  ],
+  "downstream_spec": {
+    "template": "../../sim/video_specs/jetarm_video_task_spec_template.json",
+    "output_spec": "../../outputs/video_frames/cube_to_square_test_001/jetarm_video_task_spec.json"
+  }
+}

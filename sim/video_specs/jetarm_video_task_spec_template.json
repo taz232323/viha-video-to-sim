@@ -1,0 +1,107 @@
+{
+  "description": "Template for turning a calibrated JetArm video or selected representative video frame into a MuJoCo scenario.",
+  "source": {
+    "type": "video",
+    "video_path": "/absolute/path/to/jetarm_table_video.mov",
+    "representative_frame_time_sec": 0.0,
+    "representative_frame_path": "/absolute/path/to/selected/scene_reference_best_001.jpg",
+    "selected_frames_manifest": "/absolute/path/to/outputs/video_frames/session_001/selected_frames.json"
+  },
+  "video_processing": {
+    "windows": [
+      {
+        "name": "scene_reference",
+        "start_sec": 0.5,
+        "end_sec": 2.0,
+        "purpose": "Robot base, orange, target bowl, table, and calibration markers visible."
+      },
+      {
+        "name": "pre_pick",
+        "start_sec": 3.0,
+        "end_sec": 5.0,
+        "purpose": "Orange visible before pickup."
+      },
+      {
+        "name": "pre_place",
+        "start_sec": 7.0,
+        "end_sec": 9.0,
+        "purpose": "Target bowl visible before release."
+      },
+      {
+        "name": "release",
+        "start_sec": 9.0,
+        "end_sec": 11.0,
+        "purpose": "Gripper releases the orange above the target bowl."
+      },
+      {
+        "name": "post_place",
+        "start_sec": 11.0,
+        "end_sec": 13.0,
+        "purpose": "Orange resting in the target bowl."
+      }
+    ],
+    "candidate_fps": 4,
+    "selected_frames_per_window": 1,
+    "selection_tool": "katna"
+  },
+  "robot": {
+    "id": "hiwonder_jetarm",
+    "base_body": "hiwonder_jetarm"
+  },
+  "calibration": {
+    "method": "tabletop_homography",
+    "units": "meters",
+    "table_surface_z": 0.765,
+    "table_corners_pixels": {
+      "front_left": [420, 3360],
+      "front_right": [3900, 3360],
+      "back_right": [3900, 1020],
+      "back_left": [420, 1020]
+    },
+    "table_corners_world": {
+      "front_left": [-0.45, -0.30],
+      "front_right": [0.45, -0.30],
+      "back_right": [0.45, 0.30],
+      "back_left": [-0.45, 0.30]
+    },
+    "robot_base_world_xyz": [-0.35, -0.22, 0.765],
+    "base_frame_note": "Replace all pixel/world values with measurements from the actual video calibration frame."
+  },
+  "objects": [
+    {
+      "id": "orange_0",
+      "label": "orange",
+      "mjcf_body": "bowl",
+      "center_pixel": [3450, 2970],
+      "estimated_radius_m": 0.035,
+      "body_origin_z_above_table_m": 0.035,
+      "role": "pick_object"
+    },
+    {
+      "id": "target_bowl_0",
+      "label": "target_bowl",
+      "mjcf_body": "plate",
+      "center_pixel": [2250, 3120],
+      "estimated_radius_m": 0.095,
+      "body_origin_z_above_table_m": 0.005,
+      "role": "place_target"
+    }
+  ],
+  "task": {
+    "type": "pick_and_place",
+    "pick_object": "orange_0",
+    "place_target": "target_bowl_0"
+  },
+  "scene_options": {
+    "minimal_photo_scene": true,
+    "table_body": "table",
+    "hide_bodies": ["background_shelf", "background_chair", "floor_lab_details"],
+    "hide_geoms": ["success_target"]
+  },
+  "outputs": {
+    "scene_xml": "outputs/generated/jetarm_video_scene.xml",
+    "metadata_json": "outputs/generated/jetarm_video_scene_metadata.json",
+    "snapshot_png": "outputs/generated/jetarm_video_scene_snapshot.png",
+    "result_json": "outputs/generated/jetarm_video_scene_result.json"
+  }
+}

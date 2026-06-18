@@ -1,0 +1,61 @@
+{
+  "description": "Template for turning a calibrated video or representative video frame into a FANUC MuJoCo scenario.",
+  "source": {
+    "type": "video",
+    "video_path": "/absolute/path/to/workcell_video.mov",
+    "representative_frame_time_sec": 0.0,
+    "representative_frame_path": "/absolute/path/to/first_scene_frame.jpg"
+  },
+  "robot": {
+    "id": "fanuc_cr7ial"
+  },
+  "calibration": {
+    "method": "tabletop_homography",
+    "units": "meters",
+    "table_surface_z": 0.76,
+    "table_corners_pixels": {
+      "front_left": [120, 760],
+      "front_right": [1280, 760],
+      "back_right": [1280, 180],
+      "back_left": [120, 180]
+    },
+    "table_corners_world": {
+      "front_left": [-0.78, -0.48],
+      "front_right": [0.78, -0.48],
+      "back_right": [0.78, 0.48],
+      "back_left": [-0.78, 0.48]
+    },
+    "fanuc_base_world_xyz": [-0.55, -0.34, 0.76]
+  },
+  "objects": [
+    {
+      "id": "bowl_0",
+      "label": "bowl",
+      "mjcf_body": "bowl",
+      "center_pixel": [492, 488],
+      "estimated_radius_m": 0.095,
+      "body_origin_z_above_table_m": 0.035,
+      "role": "pick_object"
+    },
+    {
+      "id": "plate_0",
+      "label": "plate",
+      "mjcf_body": "plate",
+      "center_pixel": [908, 452],
+      "estimated_radius_m": 0.16,
+      "body_origin_z_above_table_m": 0.005,
+      "role": "place_target"
+    }
+  ],
+  "task": {
+    "type": "pick_and_place",
+    "pick_object": "bowl_0",
+    "place_target": "plate_0"
+  },
+  "outputs": {
+    "scene_xml": "outputs/generated/fanuc_video_scene.xml",
+    "metadata_json": "outputs/generated/fanuc_video_scene_metadata.json",
+    "snapshot_png": "outputs/generated/fanuc_video_scene_snapshot.png",
+    "result_json": "outputs/generated/fanuc_video_scene_result.json"
+  }
+}

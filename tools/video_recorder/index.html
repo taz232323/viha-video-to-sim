@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video-To-Sim Recorder</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #111;
+        color: #f5f5f5;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      header,
+      footer {
+        padding: 14px 18px;
+        background: #181818;
+        border-color: #2b2b2b;
+      }
+
+      header {
+        border-bottom: 1px solid #2b2b2b;
+      }
+
+      footer {
+        border-top: 1px solid #2b2b2b;
+        color: #b9b9b9;
+        font-size: 13px;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 18px;
+        padding: 18px;
+      }
+
+      video {
+        width: 100%;
+        height: calc(100vh - 150px);
+        min-height: 420px;
+        object-fit: contain;
+        background: #050505;
+        border: 1px solid #2f2f2f;
+      }
+
+      aside {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+        color: #cfcfcf;
+      }
+
+      select,
+      input,
+      button,
+      a.download {
+        border: 1px solid #3a3a3a;
+        border-radius: 6px;
+        background: #222;
+        color: #fff;
+        padding: 10px 12px;
+        font: inherit;
+      }
+
+      button,
+      a.download {
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      button.primary {
+        background: #0b6bcb;
+        border-color: #1d7ee0;
+      }
+
+      button.danger {
+        background: #8b1d1d;
+        border-color: #a52a2a;
+      }
+
+      button:disabled,
+      a[aria-disabled="true"] {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+
+      .status {
+        min-height: 48px;
+        padding: 10px;
+        border: 1px solid #303030;
+        border-radius: 6px;
+        background: #181818;
+        color: #d7d7d7;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .timer {
+        font-variant-numeric: tabular-nums;
+        font-size: 24px;
+      }
+
+      @media (max-width: 850px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        video {
+          height: auto;
+          min-height: 260px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Video-To-Sim Recorder</strong>
+    </header>
+    <main>
+      <video id="preview" autoplay muted playsinline></video>
+      <aside>
+        <label>
+          Camera
+          <select id="cameraSelect"></select>
+        </label>
+        <label>
+          Filename
+          <input id="filename" value="cube_to_square_test_001.webm" />
+        </label>
+        <div class="timer" id="timer">00:00.0</div>
+        <button id="startBtn" class="primary">Start Recording</button>
+        <button id="stopBtn" class="danger" disabled>Stop Recording</button>
+        <a id="downloadLink" class="download" aria-disabled="true">Download Video</a>
+        <div class="status" id="status">Allow camera access, frame the table, then record one clean task clip.</div>
+      </aside>
+    </main>
+    <footer>
+      Keep the robot, object, target, and calibration marker visible. Pause before pickup and after placement.
+    </footer>
+    <script>
+      const preview = document.getElementById("preview");
+      const cameraSelect = document.getElementById("cameraSelect");
+      const filenameInput = document.getElementById("filename");
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const downloadLink = document.getElementById("downloadLink");
+      const statusBox = document.getElementById("status");
+      const timer = document.getElementById("timer");
+
+      let stream = null;
+      let recorder = null;
+      let chunks = [];
+      let startedAt = 0;
+      let timerId = null;
+
+      function setStatus(text) {
+        statusBox.textContent = text;
+      }
+
+      function formatElapsed(ms) {
+        const total = ms / 1000;
+        const minutes = Math.floor(total / 60);
+        const seconds = Math.floor(total % 60);
+        const tenths = Math.floor((total % 1) * 10);
+        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${tenths}`;
+      }
+
+      async function refreshCameras() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter((device) => device.kind === "videoinput");
+        cameraSelect.innerHTML = "";
+        cameras.forEach((camera, index) => {
+          const option = document.createElement("option");
+          option.value = camera.deviceId;
+          option.textContent = camera.label || `Camera ${index + 1}`;
+          cameraSelect.append(option);
+        });
+      }
+
+      async function startPreview() {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+        const deviceId = cameraSelect.value;
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            deviceId: deviceId ? { exact: deviceId } : undefined,
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 30, max: 60 },
+          },
+        });
+        preview.srcObject = stream;
+        await refreshCameras();
+      }
+
+      function startRecording() {
+        if (!stream) return;
+        chunks = [];
+        const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+          ? "video/webm;codecs=vp9"
+          : "video/webm";
+        recorder = new MediaRecorder(stream, { mimeType });
+        recorder.addEventListener("dataavailable", (event) => {
+          if (event.data.size > 0) chunks.push(event.data);
+        });
+        recorder.addEventListener("stop", () => {
+          const blob = new Blob(chunks, { type: recorder.mimeType });
+          const url = URL.createObjectURL(blob);
+          downloadLink.href = url;
+          downloadLink.download = filenameInput.value.trim() || "robot_task_video.webm";
+          downloadLink.setAttribute("aria-disabled", "false");
+          setStatus("Recording ready. Download it into /Users/amardesai/Documents/ViHa/inputs/videos/");
+        });
+        recorder.start(250);
+        startedAt = Date.now();
+        timerId = setInterval(() => {
+          timer.textContent = formatElapsed(Date.now() - startedAt);
+        }, 100);
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        downloadLink.removeAttribute("href");
+        downloadLink.setAttribute("aria-disabled", "true");
+        setStatus("Recording. Pause before pickup and after placement.");
+      }
+
+      function stopRecording() {
+        if (!recorder || recorder.state === "inactive") return;
+        recorder.stop();
+        clearInterval(timerId);
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+
+      cameraSelect.addEventListener("change", () => {
+        startPreview().catch((error) => setStatus(error.message));
+      });
+      startBtn.addEventListener("click", startRecording);
+      stopBtn.addEventListener("click", stopRecording);
+
+      startPreview()
+        .then(refreshCameras)
+        .catch((error) => setStatus(`Camera unavailable: ${error.message}`));
+    </script>
+  </body>
+</html>

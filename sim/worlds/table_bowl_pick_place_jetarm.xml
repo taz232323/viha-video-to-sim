@@ -1,0 +1,356 @@
+<mujoco model="table_bowl_pick_place_jetarm">
+  <compiler angle="degree" inertiafromgeom="true"/>
+  <option timestep="0.002" integrator="RK4" gravity="0 0 -9.81"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.25 0.25 0.25" specular="0.2 0.2 0.2"/>
+    <rgba haze="0.72 0.82 0.92 1"/>
+    <global azimuth="145" elevation="-25" offwidth="1400" offheight="900"/>
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.22 0.24 0.25" rgb2="0.3 0.32 0.33"/>
+    <material name="floor_mat" texture="grid" texrepeat="5 5" reflectance="0"/>
+    <material name="table_mat" rgba="0.58 0.39 0.22 1"/>
+    <material name="table_edge_mat" rgba="0.34 0.25 0.19 1"/>
+    <material name="metal_mat" rgba="0.55 0.58 0.6 1" specular="0.35" shininess="0.55"/>
+    <material name="jetarm_black" rgba="0.025 0.028 0.028 1" specular="0.2" shininess="0.35"/>
+    <material name="jetarm_green" rgba="0.05 0.55 0.16 1" specular="0.38" shininess="0.65"/>
+    <material name="jetarm_dark_green" rgba="0.02 0.28 0.08 1" specular="0.22" shininess="0.45"/>
+    <material name="screen_mat" rgba="0.025 0.028 0.03 1" specular="0.12" shininess="0.25"/>
+    <material name="jetarm_aluminum" rgba="0.72 0.76 0.78 1" specular="0.35" shininess="0.55"/>
+    <material name="screw_mat" rgba="0.82 0.84 0.82 1" specular="0.45" shininess="0.7"/>
+    <material name="rubber_mat" rgba="0.04 0.045 0.05 1"/>
+    <material name="cable_mat" rgba="0.015 0.015 0.018 1"/>
+    <material name="matte_blue" rgba="0.08 0.2 0.32 1"/>
+    <material name="status_panel_mat" rgba="0.08 0.09 0.095 1"/>
+    <material name="bowl_mat" rgba="0.92 0.9 0.84 1" specular="0.25" shininess="0.45"/>
+    <material name="bowl_inner_mat" rgba="0.58 0.67 0.72 1"/>
+    <material name="plate_mat" rgba="0.95 0.94 0.9 1" specular="0.2" shininess="0.35"/>
+    <material name="target_mat" rgba="0.15 0.52 0.32 1"/>
+    <material name="box_yellow" rgba="0.86 0.64 0.18 1"/>
+    <material name="box_green" rgba="0.18 0.48 0.34 1"/>
+    <material name="dark_wood" rgba="0.25 0.18 0.13 1"/>
+    <material name="paper_mat" rgba="0.92 0.9 0.82 1"/>
+    <material name="wall_mat" rgba="0.54 0.57 0.57 1"/>
+    <material name="whiteboard_mat" rgba="0.86 0.9 0.88 1" specular="0.18" shininess="0.3"/>
+    <material name="tape_mat" rgba="0.98 0.82 0.18 1"/>
+    <material name="orange_tool_mat" rgba="0.9 0.28 0.08 1"/>
+    <material name="blue_plastic_mat" rgba="0.08 0.18 0.5 1"/>
+    <material name="cardboard_mat" rgba="0.55 0.38 0.2 1"/>
+    <material name="rubber_floor_mat" rgba="0.035 0.04 0.045 1"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" type="plane" size="4 4 0.05" material="floor_mat"/>
+    <light name="key_light" pos="-1.8 -2.4 3.2" dir="0.5 0.65 -1" diffuse="0.95 0.95 0.9" specular="0.35 0.35 0.32"/>
+    <light name="fill_light" pos="2 1.8 2.2" dir="-0.5 -0.4 -1" diffuse="0.35 0.42 0.48"/>
+
+    <camera name="overview" pos="2.6 -3.35 2.35" xyaxes="0.80 0.60 0 -0.32 0.43 0.84" fovy="54"/>
+    <camera name="front" pos="0 -2.0 1.1" xyaxes="1 0 0 0 0.37 0.93"/>
+
+    <body name="background_wall" pos="0 1.55 0.82">
+      <geom name="back_wall_panel" type="box" pos="0 0 0.48" size="2.35 0.035 1.08" material="wall_mat" contype="0" conaffinity="0"/>
+      <geom name="wall_trim_low" type="box" pos="0 -0.04 -0.46" size="2.35 0.025 0.035" rgba="0.25 0.27 0.27 1" contype="0" conaffinity="0"/>
+      <geom name="whiteboard" type="box" pos="-0.62 -0.045 0.74" size="0.48 0.012 0.24" material="whiteboard_mat" contype="0" conaffinity="0"/>
+      <geom name="whiteboard_top_rail" type="box" pos="-0.62 -0.06 0.99" size="0.5 0.008 0.01" material="metal_mat" contype="0" conaffinity="0"/>
+      <geom name="whiteboard_bottom_rail" type="box" pos="-0.62 -0.06 0.49" size="0.5 0.008 0.01" material="metal_mat" contype="0" conaffinity="0"/>
+      <geom name="whiteboard_sketch_axis_x" type="box" pos="-0.68 -0.061 0.76" size="0.16 0.003 0.003" rgba="0.08 0.1 0.12 1" contype="0" conaffinity="0"/>
+      <geom name="whiteboard_sketch_axis_z" type="box" pos="-0.82 -0.061 0.82" size="0.003 0.003 0.12" rgba="0.08 0.1 0.12 1" contype="0" conaffinity="0"/>
+      <geom name="whiteboard_target_dot" type="sphere" pos="-0.55 -0.062 0.84" size="0.013" rgba="0.05 0.55 0.16 1" contype="0" conaffinity="0"/>
+      <geom name="wall_outlet_plate" type="box" pos="0.88 -0.045 0.05" size="0.06 0.008 0.045" rgba="0.9 0.88 0.82 1" contype="0" conaffinity="0"/>
+      <geom name="wall_outlet_slot_1" type="box" pos="0.86 -0.055 0.062" size="0.004 0.003 0.015" rgba="0.06 0.06 0.06 1" contype="0" conaffinity="0"/>
+      <geom name="wall_outlet_slot_2" type="box" pos="0.9 -0.055 0.062" size="0.004 0.003 0.015" rgba="0.06 0.06 0.06 1" contype="0" conaffinity="0"/>
+      <geom name="cable_trunk" type="box" pos="1.07 -0.05 0.34" size="0.035 0.016 0.54" rgba="0.74 0.76 0.73 1" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="floor_lab_details" pos="0 0 0">
+      <geom name="anti_fatigue_mat" type="box" pos="0.06 -0.72 0.006" size="0.82 0.32 0.006" material="rubber_floor_mat" contype="0" conaffinity="0"/>
+      <geom name="floor_cable_1" type="capsule" fromto="0.78 0.82 0.025 0.48 0.26 0.025" size="0.01" material="cable_mat" contype="0" conaffinity="0"/>
+      <geom name="floor_cable_2" type="capsule" fromto="0.48 0.26 0.025 0.06 -0.1 0.025" size="0.008" material="cable_mat" contype="0" conaffinity="0"/>
+      <geom name="floor_tape_marker_1" type="box" pos="-0.5 -0.66 0.014" size="0.14 0.012 0.003" material="tape_mat" contype="0" conaffinity="0"/>
+      <geom name="floor_tape_marker_2" type="box" pos="-0.5 -0.66 0.016" euler="0 0 90" size="0.14 0.012 0.003" material="tape_mat" contype="0" conaffinity="0"/>
+      <geom name="shipping_box_low" type="box" pos="-1.05 -0.58 0.13" size="0.18 0.14 0.13" material="cardboard_mat" contype="0" conaffinity="0"/>
+      <geom name="shipping_box_tape" type="box" pos="-1.05 -0.58 0.265" size="0.185 0.018 0.004" material="tape_mat" contype="0" conaffinity="0"/>
+      <geom name="small_parts_bin_floor" type="box" pos="-0.78 -0.72 0.08" size="0.12 0.08 0.055" material="blue_plastic_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="table" pos="0 0 0">
+      <geom name="tabletop" type="box" pos="0 0 0.72" size="0.78 0.48 0.04" material="table_mat" friction="0.9 0.02 0.001"/>
+      <geom name="front_edge" type="box" pos="0 -0.5 0.76" size="0.82 0.025 0.055" material="table_edge_mat"/>
+      <geom name="back_edge" type="box" pos="0 0.5 0.76" size="0.82 0.025 0.055" material="table_edge_mat"/>
+      <geom name="left_edge" type="box" pos="-0.8 0 0.76" size="0.025 0.5 0.055" material="table_edge_mat"/>
+      <geom name="right_edge" type="box" pos="0.8 0 0.76" size="0.025 0.5 0.055" material="table_edge_mat"/>
+      <geom name="leg_fl" type="box" pos="-0.68 -0.38 0.36" size="0.04 0.04 0.36" material="table_edge_mat"/>
+      <geom name="leg_fr" type="box" pos="0.68 -0.38 0.36" size="0.04 0.04 0.36" material="table_edge_mat"/>
+      <geom name="leg_bl" type="box" pos="-0.68 0.38 0.36" size="0.04 0.04 0.36" material="table_edge_mat"/>
+      <geom name="leg_br" type="box" pos="0.68 0.38 0.36" size="0.04 0.04 0.36" material="table_edge_mat"/>
+      <geom name="wood_grain_1" type="box" pos="-0.35 -0.08 0.763" size="0.28 0.004 0.003" rgba="0.36 0.24 0.14 1" contype="0" conaffinity="0"/>
+      <geom name="wood_grain_2" type="box" pos="0.22 0.15 0.763" size="0.34 0.004 0.003" rgba="0.36 0.24 0.14 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_mat" type="box" pos="0.0 0.035 0.766" size="0.34 0.22 0.002" rgba="0.06 0.08 0.085 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_x1" type="box" pos="-0.17 0.035 0.769" size="0.002 0.22 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_x2" type="box" pos="0 0.035 0.769" size="0.002 0.22 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_x3" type="box" pos="0.17 0.035 0.769" size="0.002 0.22 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_y1" type="box" pos="0 -0.075 0.77" size="0.34 0.002 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_y2" type="box" pos="0 0.035 0.77" size="0.34 0.002 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_grid_y3" type="box" pos="0 0.145 0.77" size="0.34 0.002 0.0015" rgba="0.36 0.46 0.48 1" contype="0" conaffinity="0"/>
+      <geom name="table_scuff_1" type="capsule" fromto="-0.67 -0.2 0.769 -0.51 -0.16 0.769" size="0.003" rgba="0.22 0.16 0.11 1" contype="0" conaffinity="0"/>
+      <geom name="table_scuff_2" type="capsule" fromto="0.54 0.05 0.769 0.69 0.12 0.769" size="0.003" rgba="0.22 0.16 0.11 1" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="plate" pos="0.12 0.04 0.765">
+      <geom name="target_bowl_collision" type="cylinder" pos="0 0 0.034" size="0.072 0.034" rgba="0.95 0.94 0.9 0" contype="1" conaffinity="1"/>
+      <geom name="target_bowl_foot" type="cylinder" pos="0 0 0.004" size="0.044 0.004" rgba="0.78 0.77 0.72 1" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_0" type="capsule" fromto="0.055 0 0.012 0.088 0 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_1" type="capsule" fromto="0.039 0.039 0.012 0.062 0.062 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_2" type="capsule" fromto="0 0.055 0.012 0 0.088 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_3" type="capsule" fromto="-0.039 0.039 0.012 -0.062 0.062 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_4" type="capsule" fromto="-0.055 0 0.012 -0.088 0 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_5" type="capsule" fromto="-0.039 -0.039 0.012 -0.062 -0.062 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_6" type="capsule" fromto="0 -0.055 0.012 0 -0.088 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_side_7" type="capsule" fromto="0.039 -0.039 0.012 0.062 -0.062 0.079" size="0.006" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_0" type="capsule" fromto="0.095 0 0.084 0.067 0.067 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_1" type="capsule" fromto="0.067 0.067 0.084 0 0.095 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_2" type="capsule" fromto="0 0.095 0.084 -0.067 0.067 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_3" type="capsule" fromto="-0.067 0.067 0.084 -0.095 0 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_4" type="capsule" fromto="-0.095 0 0.084 -0.067 -0.067 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_5" type="capsule" fromto="-0.067 -0.067 0.084 0 -0.095 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_6" type="capsule" fromto="0 -0.095 0.084 0.067 -0.067 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_bowl_rim_7" type="capsule" fromto="0.067 -0.067 0.084 0.095 0 0.084" size="0.007" material="plate_mat" contype="0" conaffinity="0"/>
+      <geom name="target_marker" type="cylinder" pos="0 0 0.092" size="0.035 0.0015" rgba="0.15 0.52 0.32 0" contype="0" conaffinity="0"/>
+      <site name="success_target" pos="0 0 0.09" size="0.055" rgba="0.0 0.8 0.2 0.28"/>
+    </body>
+
+    <body name="bowl" pos="-0.13 -0.04 0.79">
+      <freejoint name="bowl_free"/>
+      <geom name="bowl_collision" type="cylinder" pos="0 0 0.032" size="0.058 0.032" material="bowl_mat" mass="0.045" friction="0.95 0.02 0.001"/>
+      <geom name="bowl_rim" type="cylinder" pos="0 0 0.068" size="0.074 0.007" material="bowl_mat" contype="0" conaffinity="0"/>
+      <geom name="bowl_inner" type="cylinder" pos="0 0 0.075" size="0.046 0.003" material="bowl_inner_mat" contype="0" conaffinity="0"/>
+      <geom name="bowl_contents_1" type="sphere" pos="-0.02 -0.01 0.084" size="0.009" rgba="0.78 0.62 0.36 1" contype="0" conaffinity="0"/>
+      <geom name="bowl_contents_2" type="sphere" pos="0.018 0.004 0.085" size="0.008" rgba="0.82 0.7 0.46 1" contype="0" conaffinity="0"/>
+      <geom name="bowl_contents_3" type="sphere" pos="0.0 0.022 0.083" size="0.007" rgba="0.68 0.5 0.3 1" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="jetarm_reference_mount" pos="-0.18 -0.19 0.772">
+      <geom name="black_mount_deck" type="box" pos="0 0 0" size="0.43 0.285 0.018" material="jetarm_black" contype="0" conaffinity="0"/>
+      <geom name="electronics_box" type="box" pos="0.03 0.06 0.055" size="0.16 0.115 0.045" rgba="0.035 0.038 0.04 1" contype="0" conaffinity="0"/>
+      <geom name="front_open_slot" type="box" pos="0.02 -0.22 0.035" size="0.18 0.012 0.018" rgba="0.0 0.0 0.0 1" contype="0" conaffinity="0"/>
+      <geom name="electronics_vent_1" type="box" pos="0.17 0.06 0.104" size="0.045 0.004 0.003" rgba="0.0 0.0 0.0 1" contype="0" conaffinity="0"/>
+      <geom name="electronics_vent_2" type="box" pos="0.17 0.08 0.104" size="0.045 0.004 0.003" rgba="0.0 0.0 0.0 1" contype="0" conaffinity="0"/>
+      <geom name="electronics_vent_3" type="box" pos="0.17 0.10 0.104" size="0.045 0.004 0.003" rgba="0.0 0.0 0.0 1" contype="0" conaffinity="0"/>
+      <geom name="blue_status_led" type="cylinder" pos="-0.13 -0.128 0.034" euler="90 0 0" size="0.009 0.003" rgba="0.05 0.16 0.95 1" contype="0" conaffinity="0"/>
+      <geom name="red_status_led" type="cylinder" pos="-0.1 -0.128 0.034" euler="90 0 0" size="0.006 0.003" rgba="0.95 0.04 0.04 1" contype="0" conaffinity="0"/>
+      <geom name="screen_left_post" type="box" pos="0.55 -0.03 0.18" size="0.01 0.01 0.18" material="jetarm_aluminum" contype="0" conaffinity="0"/>
+      <geom name="screen_right_post" type="box" pos="0.55 0.18 0.18" size="0.01 0.01 0.18" material="jetarm_aluminum" contype="0" conaffinity="0"/>
+      <geom name="display_back" type="box" pos="0.58 0.075 0.27" euler="0 0 0" size="0.018 0.145 0.18" material="screen_mat" contype="0" conaffinity="0"/>
+      <geom name="display_glass" type="box" pos="0.602 0.075 0.27" size="0.003 0.128 0.16" rgba="0.03 0.035 0.038 1" contype="0" conaffinity="0"/>
+      <geom name="suction_foot_fl" type="cylinder" pos="-0.36 -0.23 -0.02" size="0.045 0.006" rgba="0.45 0.48 0.48 0.75" contype="0" conaffinity="0"/>
+      <geom name="suction_foot_fr" type="cylinder" pos="0.32 -0.23 -0.02" size="0.045 0.006" rgba="0.45 0.48 0.48 0.75" contype="0" conaffinity="0"/>
+      <geom name="suction_foot_bl" type="cylinder" pos="-0.36 0.23 -0.02" size="0.045 0.006" rgba="0.45 0.48 0.48 0.75" contype="0" conaffinity="0"/>
+      <geom name="suction_foot_br" type="cylinder" pos="0.32 0.23 -0.02" size="0.045 0.006" rgba="0.45 0.48 0.48 0.75" contype="0" conaffinity="0"/>
+      <geom name="mount_cutout_front" type="box" pos="-0.24 -0.232 0.023" size="0.055 0.009 0.006" rgba="0.0 0.0 0.0 1" contype="0" conaffinity="0"/>
+      <geom name="mount_cutout_rear" type="box" pos="0.12 0.232 0.023" size="0.055 0.009 0.006" rgba="0.0 0.0 0.0 1" contype="0" conaffinity="0"/>
+      <geom name="mount_screw_1" type="cylinder" pos="-0.34 -0.22 0.023" size="0.011 0.005" material="screw_mat" contype="0" conaffinity="0"/>
+      <geom name="mount_screw_2" type="cylinder" pos="0.3 -0.22 0.023" size="0.011 0.005" material="screw_mat" contype="0" conaffinity="0"/>
+      <geom name="mount_screw_3" type="cylinder" pos="-0.34 0.22 0.023" size="0.011 0.005" material="screw_mat" contype="0" conaffinity="0"/>
+      <geom name="mount_screw_4" type="cylinder" pos="0.3 0.22 0.023" size="0.011 0.005" material="screw_mat" contype="0" conaffinity="0"/>
+      <geom name="rear_cable_bundle_1" type="capsule" fromto="-0.08 0.21 0.08 -0.25 0.32 0.12" size="0.008" material="cable_mat" contype="0" conaffinity="0"/>
+      <geom name="rear_cable_bundle_2" type="capsule" fromto="0.02 0.21 0.09 0.22 0.34 0.13" size="0.006" material="cable_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="hiwonder_jetarm" pos="-0.35 -0.22 0.765">
+      <geom name="jetarm_base_plate" type="box" pos="0 0 0.012" size="0.14 0.11 0.012" material="jetarm_black"/>
+      <geom name="jetarm_base_servo" type="box" pos="0 0 0.062" size="0.08 0.065 0.047" material="jetarm_green" contype="0" conaffinity="0"/>
+      <geom name="base_rotation_disc" type="cylinder" pos="0 0 0.112" size="0.092 0.012" material="jetarm_dark_green" contype="0" conaffinity="0"/>
+      <geom name="depth_camera_stand" type="box" pos="-0.085 0.075 0.15" size="0.012 0.012 0.13" material="jetarm_black" contype="0" conaffinity="0"/>
+      <geom name="depth_camera" type="box" pos="-0.085 0.045 0.29" size="0.065 0.022 0.026" material="jetarm_black" contype="0" conaffinity="0"/>
+      <geom name="depth_lens_left" type="cylinder" pos="-0.12 0.02 0.29" euler="90 0 0" size="0.012 0.004" rgba="0.02 0.05 0.08 1" contype="0" conaffinity="0"/>
+      <geom name="depth_lens_right" type="cylinder" pos="-0.05 0.02 0.29" euler="90 0 0" size="0.012 0.004" rgba="0.02 0.05 0.08 1" contype="0" conaffinity="0"/>
+
+      <body name="jetarm_joint_1" pos="0 0 0.112">
+        <joint name="j1" type="hinge" axis="0 0 1" range="-150 150" limited="true" damping="16" armature="0.025"/>
+        <geom name="j1_servo_case" type="box" pos="0 0 0.025" size="0.057 0.05 0.035" material="jetarm_green" contype="0" conaffinity="0"/>
+        <geom name="j1_black_cap" type="cylinder" pos="0 -0.052 0.025" euler="90 0 0" size="0.032 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+        <geom name="j1_cap_screw_a" type="cylinder" pos="0.02 -0.059 0.043" euler="90 0 0" size="0.005 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+        <geom name="j1_cap_screw_b" type="cylinder" pos="-0.02 -0.059 0.007" euler="90 0 0" size="0.005 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+
+        <body name="jetarm_joint_2" pos="0 0 0.075">
+          <joint name="j2" type="hinge" axis="0 1 0" range="-105 105" limited="true" damping="18" armature="0.025"/>
+          <geom name="j2_servo_case" type="box" pos="0 0 0" size="0.049 0.062 0.04" material="jetarm_green" contype="0" conaffinity="0"/>
+          <geom name="j2_black_cap_l" type="cylinder" pos="0 -0.066 0" euler="90 0 0" size="0.035 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+          <geom name="j2_black_cap_r" type="cylinder" pos="0 0.066 0" euler="90 0 0" size="0.035 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+          <geom name="shoulder_bracket_l" type="box" pos="0 -0.045 0.08" size="0.014 0.006 0.095" material="jetarm_green" contype="0" conaffinity="0"/>
+          <geom name="shoulder_bracket_r" type="box" pos="0 0.045 0.08" size="0.014 0.006 0.095" material="jetarm_green" contype="0" conaffinity="0"/>
+          <geom name="upper_link_l" type="box" pos="0 -0.036 0.12" size="0.018 0.005 0.105" material="jetarm_green" contype="0" conaffinity="0"/>
+          <geom name="upper_link_r" type="box" pos="0 0.036 0.12" size="0.018 0.005 0.105" material="jetarm_green" contype="0" conaffinity="0"/>
+          <geom name="upper_link_slot_l" type="box" pos="0.001 -0.042 0.13" size="0.006 0.003 0.042" material="jetarm_black" contype="0" conaffinity="0"/>
+          <geom name="upper_link_slot_r" type="box" pos="0.001 0.042 0.13" size="0.006 0.003 0.042" material="jetarm_black" contype="0" conaffinity="0"/>
+          <geom name="upper_wire_loop" type="capsule" fromto="-0.045 -0.06 0.02 -0.06 -0.06 0.19" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+
+          <body name="jetarm_joint_3" pos="0 0 0.205">
+            <joint name="j3" type="hinge" axis="0 1 0" range="-120 120" limited="true" damping="16" armature="0.022"/>
+            <geom name="j3_servo_case" type="box" pos="0 0 0" size="0.048 0.06 0.037" material="jetarm_green" contype="0" conaffinity="0"/>
+            <geom name="j3_black_cap_l" type="cylinder" pos="0 -0.064 0" euler="90 0 0" size="0.033 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+            <geom name="j3_black_cap_r" type="cylinder" pos="0 0.064 0" euler="90 0 0" size="0.033 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+            <geom name="forearm_link_l" type="box" pos="0.088 -0.034 0" size="0.095 0.005 0.018" material="jetarm_green" contype="0" conaffinity="0"/>
+            <geom name="forearm_link_r" type="box" pos="0.088 0.034 0" size="0.095 0.005 0.018" material="jetarm_green" contype="0" conaffinity="0"/>
+            <geom name="forearm_slot_l" type="box" pos="0.092 -0.04 0" size="0.04 0.003 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+            <geom name="forearm_slot_r" type="box" pos="0.092 0.04 0" size="0.04 0.003 0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+            <geom name="servo_wire" type="capsule" fromto="-0.02 -0.055 -0.015 0.16 -0.055 -0.01" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+
+            <body name="jetarm_joint_4" pos="0.175 0 0">
+              <joint name="j4" type="hinge" axis="1 0 0" range="-150 150" limited="true" damping="10" armature="0.015"/>
+              <geom name="j4_servo_case" type="box" pos="0 0 0" size="0.038 0.048 0.032" material="jetarm_black" contype="0" conaffinity="0"/>
+              <geom name="wrist_pitch_link" type="box" pos="0.035 0 0" size="0.045 0.018 0.012" material="jetarm_black" contype="0" conaffinity="0"/>
+
+              <body name="jetarm_joint_5" pos="0.07 0 0">
+                <joint name="j5" type="hinge" axis="0 1 0" range="-105 105" limited="true" damping="10" armature="0.015"/>
+                <geom name="j5_servo_case" type="box" pos="0 0 0" size="0.034 0.044 0.03" material="jetarm_black" contype="0" conaffinity="0"/>
+                <geom name="wrist_roll_link" type="box" pos="0.028 0 0" size="0.038 0.015 0.01" material="jetarm_black" contype="0" conaffinity="0"/>
+
+                <body name="jetarm_joint_6" pos="0.055 0 0">
+                  <joint name="j6" type="hinge" axis="1 0 0" range="-180 180" limited="true" damping="8" armature="0.012"/>
+                  <geom name="j6_servo_case" type="box" pos="0 0 0" size="0.032 0.04 0.028" material="jetarm_black" contype="0" conaffinity="0"/>
+
+                  <body name="gripper_palm" pos="0.05 0 0">
+                    <geom name="gripper_palm_geom" type="box" pos="0.002 0 0" size="0.034 0.064 0.026" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_face_plate" type="box" pos="0.034 0 0.032" size="0.018 0.074 0.009" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_neck_ring" type="cylinder" pos="-0.032 0 -0.022" euler="0 90 0" size="0.034 0.008" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_cable_loop" type="capsule" fromto="-0.025 -0.06 0.01 -0.02 -0.12 -0.055" size="0.005" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <site name="gripper_site" pos="0.167 0 -0.092" size="0.001" rgba="0.05 0.9 0.2 0"/>
+                    <geom name="gripper_crossbar" type="box" pos="0.052 0 0.026" size="0.06 0.011 0.007" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_base_link_l" type="capsule" fromto="0.012 -0.058 0.027 0.078 -0.058 0.088" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_base_link_r" type="capsule" fromto="0.012 0.058 0.027 0.078 0.058 0.088" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_inner_link_l" type="capsule" fromto="0.042 -0.034 0.024 0.105 -0.034 0.078" size="0.0045" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_inner_link_r" type="capsule" fromto="0.042 0.034 0.024 0.105 0.034 0.078" size="0.0045" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_center_yoke_l" type="capsule" fromto="0.036 -0.016 0.035 0.074 -0.016 0.035" size="0.005" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_center_yoke_r" type="capsule" fromto="0.036 0.016 0.035 0.074 0.016 0.035" size="0.005" material="jetarm_black" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_l0" type="cylinder" pos="0.014 -0.061 0.03" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_l1" type="cylinder" pos="0.078 -0.061 0.088" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_l2" type="cylinder" pos="0.042 -0.037 0.024" euler="90 0 0" size="0.007 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_l3" type="cylinder" pos="0.106 -0.037 0.078" euler="90 0 0" size="0.007 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_r0" type="cylinder" pos="0.014 0.061 0.03" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_r1" type="cylinder" pos="0.078 0.061 0.088" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_r2" type="cylinder" pos="0.042 0.037 0.024" euler="90 0 0" size="0.007 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_pivot_r3" type="cylinder" pos="0.106 0.037 0.078" euler="90 0 0" size="0.007 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                    <geom name="gripper_span_marker" type="box" pos="0.128 0 -0.046" size="0.004 0.058 0.003" rgba="0.05 0.9 0.2 0" contype="0" conaffinity="0"/>
+                    <body name="left_finger" pos="0.086 -0.082 0">
+                      <joint name="left_finger_slide" type="slide" axis="0 1 0" range="0 0.035" limited="true" damping="5"/>
+                      <geom name="left_finger_upper_link" type="capsule" fromto="-0.008 0 0.08 0.048 0 -0.008" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+                      <geom name="left_finger_drive_link" type="capsule" fromto="-0.03 0 0.018 0.032 0 -0.036" size="0.005" material="jetarm_black" contype="0" conaffinity="0"/>
+                      <geom name="left_finger_stem" type="capsule" fromto="0.04 0 -0.006 0.075 0 -0.076" size="0.008" material="jetarm_black" contype="0" conaffinity="0"/>
+                      <geom name="left_finger_pad" type="capsule" fromto="0.072 0 -0.072 0.089 0 -0.112" size="0.015" material="rubber_mat" friction="1.2 0.04 0.001"/>
+                      <geom name="left_finger_tip" type="ellipsoid" pos="0.091 0 -0.119" size="0.021 0.015 0.018" material="rubber_mat" friction="1.2 0.04 0.001"/>
+                      <geom name="left_finger_pivot_top" type="cylinder" pos="-0.006 0 0.078" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                      <geom name="left_finger_pivot_mid" type="cylinder" pos="0.034 0 -0.032" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                      <site name="left_grip_contact" pos="0.078 0 -0.046" size="0.001" rgba="0.95 0.1 0.1 0"/>
+                    </body>
+                    <body name="right_finger" pos="0.086 0.082 0">
+                      <joint name="right_finger_slide" type="slide" axis="0 -1 0" range="0 0.035" limited="true" damping="5"/>
+                      <geom name="right_finger_upper_link" type="capsule" fromto="-0.008 0 0.08 0.048 0 -0.008" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+                      <geom name="right_finger_drive_link" type="capsule" fromto="-0.03 0 0.018 0.032 0 -0.036" size="0.005" material="jetarm_black" contype="0" conaffinity="0"/>
+                      <geom name="right_finger_stem" type="capsule" fromto="0.04 0 -0.006 0.075 0 -0.076" size="0.008" material="jetarm_black" contype="0" conaffinity="0"/>
+                      <geom name="right_finger_pad" type="capsule" fromto="0.072 0 -0.072 0.089 0 -0.112" size="0.015" material="rubber_mat" friction="1.2 0.04 0.001"/>
+                      <geom name="right_finger_tip" type="ellipsoid" pos="0.091 0 -0.119" size="0.021 0.015 0.018" material="rubber_mat" friction="1.2 0.04 0.001"/>
+                      <geom name="right_finger_pivot_top" type="cylinder" pos="-0.006 0 0.078" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                      <geom name="right_finger_pivot_mid" type="cylinder" pos="0.034 0 -0.032" euler="90 0 0" size="0.008 0.004" material="screw_mat" contype="0" conaffinity="0"/>
+                      <site name="right_grip_contact" pos="0.078 0 -0.046" size="0.001" rgba="0.95 0.1 0.1 0"/>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <body name="jetson_box" pos="-0.58 -0.25 0.775">
+      <geom name="jetson_case" type="box" pos="0 0 0.022" size="0.09 0.065 0.022" rgba="0.09 0.1 0.11 1" contype="0" conaffinity="0"/>
+      <geom name="jetson_fan" type="cylinder" pos="0 0 0.048" size="0.025 0.004" rgba="0.02 0.02 0.025 1" contype="0" conaffinity="0"/>
+      <geom name="usb_cable" type="capsule" fromto="-0.03 0.06 0.04 0.18 0.11 0.05" size="0.006" material="jetarm_black" contype="0" conaffinity="0"/>
+      <geom name="ethernet_jack" type="box" pos="0.065 -0.045 0.027" size="0.014 0.006 0.01" rgba="0.78 0.68 0.28 1" contype="0" conaffinity="0"/>
+      <geom name="power_button" type="cylinder" pos="-0.067 -0.048 0.026" euler="90 0 0" size="0.009 0.004" rgba="0.0 0.38 0.12 1" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="background_shelf" pos="-1.2 0.65 0">
+      <geom name="shelf_left" type="box" pos="-0.24 0 0.62" size="0.025 0.12 0.6" material="dark_wood"/>
+      <geom name="shelf_right" type="box" pos="0.24 0 0.62" size="0.025 0.12 0.6" material="dark_wood"/>
+      <geom name="shelf_bottom" type="box" pos="0 0 0.22" size="0.28 0.13 0.025" material="dark_wood"/>
+      <geom name="shelf_mid" type="box" pos="0 0 0.62" size="0.28 0.13 0.025" material="dark_wood"/>
+      <geom name="shelf_top" type="box" pos="0 0 1.02" size="0.28 0.13 0.025" material="dark_wood"/>
+      <geom name="green_bin" type="box" pos="0.11 0.015 0.75" size="0.075 0.08 0.09" material="box_green"/>
+      <geom name="yellow_bin" type="box" pos="0 0.01 1.11" size="0.11 0.08 0.06" material="box_yellow"/>
+      <geom name="binder_stack_1" type="box" pos="-0.11 0.01 0.30" size="0.09 0.075 0.018" material="matte_blue"/>
+      <geom name="binder_stack_2" type="box" pos="-0.11 0.01 0.342" size="0.09 0.075 0.018" rgba="0.5 0.07 0.08 1"/>
+      <geom name="storage_bin_label" type="box" pos="0.11 -0.067 0.75" size="0.045 0.003 0.018" material="paper_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="background_chair" pos="1.12 0.72 0">
+      <geom name="chair_seat" type="box" pos="0 0 0.42" size="0.17 0.16 0.025" rgba="0.18 0.28 0.36 1"/>
+      <geom name="chair_back" type="box" pos="0 0.14 0.68" size="0.17 0.025 0.24" rgba="0.18 0.28 0.36 1"/>
+      <geom name="chair_leg_1" type="box" pos="-0.12 -0.1 0.21" size="0.018 0.018 0.21" material="metal_mat"/>
+      <geom name="chair_leg_2" type="box" pos="0.12 -0.1 0.21" size="0.018 0.018 0.21" material="metal_mat"/>
+      <geom name="chair_leg_3" type="box" pos="-0.12 0.1 0.21" size="0.018 0.018 0.21" material="metal_mat"/>
+      <geom name="chair_leg_4" type="box" pos="0.12 0.1 0.21" size="0.018 0.018 0.21" material="metal_mat"/>
+    </body>
+
+    <body name="tabletop_background_objects" pos="0 0 0">
+      <geom name="coffee_mug" type="cylinder" pos="-0.54 0.22 0.815" size="0.045 0.05" rgba="0.32 0.2 0.6 1"/>
+      <geom name="coffee_mug_handle" type="capsule" fromto="-0.585 0.22 0.82 -0.625 0.22 0.855" size="0.008" rgba="0.32 0.2 0.6 1" contype="0" conaffinity="0"/>
+      <geom name="small_box" type="box" pos="0.48 -0.18 0.805" size="0.07 0.045 0.04" material="box_yellow"/>
+      <geom name="tool_block" type="box" pos="-0.08 0.28 0.79" size="0.11 0.025 0.025" material="metal_mat"/>
+      <geom name="sensor_cube" type="box" pos="0.5 0.26 0.8" size="0.04 0.04 0.04" material="box_green"/>
+      <geom name="paper_note" type="box" pos="-0.41 -0.32 0.766" size="0.11 0.055 0.002" material="paper_mat" contype="0" conaffinity="0"/>
+      <geom name="pen_body" type="capsule" fromto="0.25 -0.26 0.79 0.42 -0.2 0.79" size="0.008" rgba="0.02 0.04 0.08 1" contype="0" conaffinity="0"/>
+      <geom name="small_screw_1" type="cylinder" pos="0.35 0.18 0.769" size="0.011 0.005" material="metal_mat" contype="0" conaffinity="0"/>
+      <geom name="small_screw_2" type="cylinder" pos="0.4 0.17 0.769" size="0.01 0.005" material="metal_mat" contype="0" conaffinity="0"/>
+      <geom name="laptop_base" type="box" pos="-0.55 -0.06 0.78" size="0.12 0.08 0.006" rgba="0.08 0.085 0.09 1" contype="0" conaffinity="0"/>
+      <geom name="laptop_screen" type="box" pos="-0.63 -0.06 0.85" euler="0 22 0" size="0.006 0.08 0.07" rgba="0.02 0.025 0.03 1" contype="0" conaffinity="0"/>
+      <geom name="laptop_screen_glow" type="box" pos="-0.637 -0.06 0.85" euler="0 22 0" size="0.002 0.07 0.058" rgba="0.05 0.18 0.28 1" contype="0" conaffinity="0"/>
+      <geom name="keyboard" type="box" pos="0.34 -0.05 0.775" size="0.12 0.035 0.006" rgba="0.035 0.038 0.04 1" contype="0" conaffinity="0"/>
+      <geom name="keyboard_key_row_1" type="box" pos="0.34 -0.05 0.783" size="0.108 0.003 0.002" rgba="0.18 0.19 0.19 1" contype="0" conaffinity="0"/>
+      <geom name="keyboard_key_row_2" type="box" pos="0.34 -0.034 0.783" size="0.108 0.003 0.002" rgba="0.18 0.19 0.19 1" contype="0" conaffinity="0"/>
+      <geom name="mouse" type="ellipsoid" pos="0.55 -0.055 0.782" size="0.025 0.018 0.009" rgba="0.05 0.055 0.06 1" contype="0" conaffinity="0"/>
+      <geom name="tape_roll_outer" type="cylinder" pos="-0.28 0.28 0.794" euler="90 0 0" size="0.035 0.012" material="tape_mat" contype="0" conaffinity="0"/>
+      <geom name="tape_roll_core" type="cylinder" pos="-0.28 0.28 0.795" euler="90 0 0" size="0.018 0.013" rgba="0.9 0.88 0.76 1" contype="0" conaffinity="0"/>
+      <geom name="orange_screwdriver_handle" type="capsule" fromto="-0.58 -0.31 0.787 -0.45 -0.28 0.787" size="0.011" material="orange_tool_mat" contype="0" conaffinity="0"/>
+      <geom name="screwdriver_shaft" type="capsule" fromto="-0.45 -0.28 0.787 -0.34 -0.255 0.787" size="0.004" material="metal_mat" contype="0" conaffinity="0"/>
+      <geom name="calibration_cube_red" type="box" pos="0.16 -0.27 0.787" size="0.018 0.018 0.018" rgba="0.85 0.06 0.05 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_cube_blue" type="box" pos="0.2 -0.29 0.787" size="0.018 0.018 0.018" rgba="0.06 0.18 0.85 1" contype="0" conaffinity="0"/>
+      <geom name="calibration_cube_green" type="box" pos="0.24 -0.27 0.787" size="0.018 0.018 0.018" rgba="0.05 0.65 0.18 1" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="bench_side_equipment" pos="0 0 0">
+      <geom name="power_strip" type="box" pos="0.71 0.24 0.787" size="0.11 0.026 0.012" rgba="0.86 0.86 0.82 1" contype="0" conaffinity="0"/>
+      <geom name="power_strip_socket_1" type="cylinder" pos="0.66 0.235 0.801" size="0.008 0.002" rgba="0.05 0.05 0.05 1" contype="0" conaffinity="0"/>
+      <geom name="power_strip_socket_2" type="cylinder" pos="0.71 0.235 0.801" size="0.008 0.002" rgba="0.05 0.05 0.05 1" contype="0" conaffinity="0"/>
+      <geom name="power_strip_socket_3" type="cylinder" pos="0.76 0.235 0.801" size="0.008 0.002" rgba="0.05 0.05 0.05 1" contype="0" conaffinity="0"/>
+      <geom name="bench_cable_to_strip" type="capsule" fromto="0.69 0.24 0.798 0.34 0.18 0.792" size="0.005" material="cable_mat" contype="0" conaffinity="0"/>
+      <geom name="usb_cable_to_laptop" type="capsule" fromto="-0.49 -0.05 0.79 -0.2 -0.16 0.79" size="0.005" material="cable_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="task_status_panel" pos="0.62 0.39 0.89">
+      <geom name="status_panel_back" type="box" pos="0 0 0.07" size="0.105 0.012 0.125" material="status_panel_mat" contype="0" conaffinity="0"/>
+      <geom name="status_pick_light" type="sphere" pos="-0.066 -0.014 0.13" size="0.018" rgba="0.12 0.13 0.13 1" contype="0" conaffinity="0"/>
+      <geom name="status_carry_light" type="sphere" pos="-0.022 -0.014 0.13" size="0.018" rgba="0.12 0.13 0.13 1" contype="0" conaffinity="0"/>
+      <geom name="status_place_light" type="sphere" pos="0.022 -0.014 0.13" size="0.018" rgba="0.12 0.13 0.13 1" contype="0" conaffinity="0"/>
+      <geom name="status_success_light" type="sphere" pos="0.066 -0.014 0.13" size="0.018" rgba="0.12 0.13 0.13 1" contype="0" conaffinity="0"/>
+      <geom name="status_pick_label" type="box" pos="-0.066 -0.015 0.08" size="0.018 0.003 0.006" rgba="0.95 0.68 0.12 1" contype="0" conaffinity="0"/>
+      <geom name="status_carry_label" type="box" pos="-0.022 -0.015 0.08" size="0.018 0.003 0.006" rgba="0.15 0.48 0.95 1" contype="0" conaffinity="0"/>
+      <geom name="status_place_label" type="box" pos="0.022 -0.015 0.08" size="0.018 0.003 0.006" rgba="0.95 0.86 0.18 1" contype="0" conaffinity="0"/>
+      <geom name="status_success_label" type="box" pos="0.066 -0.015 0.08" size="0.018 0.003 0.006" rgba="0.1 0.86 0.32 1" contype="0" conaffinity="0"/>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="j1_position" joint="j1" kp="65" ctrlrange="-150 150"/>
+    <position name="j2_position" joint="j2" kp="75" ctrlrange="-105 105"/>
+    <position name="j3_position" joint="j3" kp="65" ctrlrange="-120 120"/>
+    <position name="j4_position" joint="j4" kp="40" ctrlrange="-150 150"/>
+    <position name="j5_position" joint="j5" kp="40" ctrlrange="-105 105"/>
+    <position name="j6_position" joint="j6" kp="30" ctrlrange="-180 180"/>
+    <position name="left_finger_position" joint="left_finger_slide" kp="140" ctrlrange="0 0.035"/>
+    <position name="right_finger_position" joint="right_finger_slide" kp="140" ctrlrange="0 0.035"/>
+  </actuator>
+</mujoco>

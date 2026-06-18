@@ -1,0 +1,98 @@
+{
+  "task_description": "Pick up bowl_0 from the table and place it on plate_0 on the same table.",
+  "scene": "sim/worlds/table_bowl_pick_place.xml",
+  "robot": {
+    "id": "fanuc_cr7ial",
+    "label": "FANUC CR-7iA/L approximate 6-axis arm",
+    "payload_kg": 7,
+    "reach_m": 0.911,
+    "controlled_axes": 6,
+    "mass_kg": 55,
+    "protection": "IP67/IP67",
+    "source_note": "Public FANUC CR-7iA/L data sheet values used for high-level scale and metadata.",
+    "model_note": "Hand-authored MJCF approximation for early environment bring-up; replace with converted FANUC URDF/CAD when available."
+  },
+  "objects": [
+    {
+      "id": "bowl_0",
+      "label": "bowl",
+      "mjcf_body": "bowl",
+      "init_pose": [-0.28, -0.03, 0.795, 1, 0, 0, 0],
+      "physics": {
+        "mass_kg": 0.08,
+        "friction": [0.95, 0.02, 0.001],
+        "estimated": true
+      }
+    },
+    {
+      "id": "plate_0",
+      "label": "plate",
+      "mjcf_body": "plate",
+      "init_pose": [0.28, 0.03, 0.765, 1, 0, 0, 0],
+      "physics": {
+        "static": true
+      }
+    },
+    {
+      "id": "table_0",
+      "label": "table",
+      "mjcf_body": "table",
+      "support_surface_z": 0.76,
+      "workspace_bounds": [-0.78, -0.48, 0.78, 0.48]
+    }
+  ],
+  "goal_predicates": ["On(bowl_0, plate_0)"],
+  "stages": [
+    {
+      "name": "approach_bowl",
+      "check": "Near(gripper_site, bowl_0)"
+    },
+    {
+      "name": "grasp_bowl",
+      "check": "Grasped(bowl_0)"
+    },
+    {
+      "name": "lift_bowl",
+      "check": "Lifted(bowl_0, table_0)"
+    },
+    {
+      "name": "place_bowl",
+      "check": "On(bowl_0, plate_0)"
+    }
+  ],
+  "success": {
+    "all_of": ["On(bowl_0, plate_0)"],
+    "settle_steps": 50,
+    "runtime_signal": "run_pick_place_demo.py prints TASK COMPLETE when task_success(state) is true"
+  },
+  "constraints": {
+    "workspace_bounds": [-0.78, -0.48, 0.78, 0.48],
+    "ordering": "stages_in_order",
+    "forbidden": ["dropped(bowl_0)", "collision(robot, tabletop_background_objects)"]
+  },
+  "predicate_defs": {
+    "On": {
+      "type": "support_contact",
+      "support": "plate_0",
+      "object": "bowl_0",
+      "xy_distance_tol": 0.08,
+      "z_min": 0.79,
+      "z_max": 0.88
+    },
+    "Near": {
+      "type": "site_to_body_distance",
+      "distance_tol": 0.08
+    },
+    "Grasped": {
+      "type": "in_gripper_and_lifted",
+      "gripper_site": "gripper_site",
+      "distance_tol": 0.06,
+      "lift_above_table": 0.04
+    },
+    "Lifted": {
+      "type": "body_z_above_support",
+      "support_z": 0.76,
+      "z_delta": 0.08
+    }
+  }
+}
